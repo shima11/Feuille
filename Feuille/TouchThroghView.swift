@@ -1,5 +1,5 @@
 //
-//  BackDropView.swift
+//  TouchThroghView.swift
 //  Feuille
 //
 //  Created by jinsei_shima on 2019/02/21.
@@ -7,7 +7,3 @@
 //
 
 import Foundation
-
-class BackDropView: UIView {
-    
-}
