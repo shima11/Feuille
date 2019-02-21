@@ -6,6 +6,8 @@ target 'Demo' do
   use_frameworks!
 
   pod 'Reveal-SDK'
+  pod 'EasyPeasy'
+  
   # Pods for Demo
 
 end

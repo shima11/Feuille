@@ -27,6 +27,8 @@ public class ContentView: UIView {
             bodyView.bottomAnchor.constraint(equalTo: bottomAnchor),
             ])
 
+        layoutIfNeeded()
+
     }
 
 

@@ -12,10 +12,13 @@ public class FeuilleView: TouchThroughView {
     
     // MARK: - Properties
 
-    public let contentView = ContentView()
+//    public let topView = ContentView()
+    public let middleView = ContentView()
+    public let bottomView = ContentView() // <-
 
-    private let keyboardLayoutGuide: UILayoutGuide = .init()
+    private let bottomLayoutGuide: UILayoutGuide = .init()
     private var keyboardHeight: NSLayoutConstraint!
+    private var bottomViewHeight: NSLayoutConstraint!
 
     // MARK: - Initializers
 
@@ -23,34 +26,73 @@ public class FeuilleView: TouchThroughView {
         super.init(frame: .zero)
 
         do {
-            addLayoutGuide(keyboardLayoutGuide)
+            addLayoutGuide(bottomLayoutGuide)
             
-            let height = keyboardLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
+            let height = bottomLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
+//            height.priority = .defaultHigh
             self.keyboardHeight = height
 
             NSLayoutConstraint.activate([
                 height,
-                keyboardLayoutGuide.rightAnchor.constraint(equalTo: rightAnchor),
-                keyboardLayoutGuide.leftAnchor.constraint(equalTo: leftAnchor),
-                keyboardLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
+                bottomLayoutGuide.rightAnchor.constraint(equalTo: rightAnchor),
+                bottomLayoutGuide.leftAnchor.constraint(equalTo: leftAnchor),
+                bottomLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
+                ])
+            
+        }
+
+//        addSubview(topView)
+        addSubview(middleView)
+        addSubview(bottomView)
+
+//        do {
+//
+//            topView.translatesAutoresizingMaskIntoConstraints = false
+//
+//            NSLayoutConstraint.activate([
+//                topView.rightAnchor.constraint(equalTo: rightAnchor),
+//                topView.leftAnchor.constraint(equalTo: leftAnchor),
+//                topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
+//                ])
+//
+//        }
+
+        do {
+
+            middleView.translatesAutoresizingMaskIntoConstraints = false
+
+            let a = middleView.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor)
+            a.priority = .defaultLow
+            let b = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
+            b.priority = .defaultLow
+
+            NSLayoutConstraint.activate([
+                middleView.rightAnchor.constraint(equalTo: rightAnchor),
+                middleView.leftAnchor.constraint(equalTo: leftAnchor),
+                middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomLayoutGuide.topAnchor),
+                middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
+                a,
+                b
                 ])
             
         }
 
         do {
-            addSubview(contentView)
 
-            contentView.translatesAutoresizingMaskIntoConstraints = false
+            bottomView.translatesAutoresizingMaskIntoConstraints = false
+            bottomView.heightAnchor.constraint(equalToConstant: 200).isActive = true
 
             NSLayoutConstraint.activate([
-                contentView.rightAnchor.constraint(equalTo: rightAnchor),
-                contentView.leftAnchor.constraint(equalTo: leftAnchor),
-                contentView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
+                bottomView.rightAnchor.constraint(equalTo: rightAnchor),
+                bottomView.leftAnchor.constraint(equalTo: leftAnchor),
+                bottomView.bottomAnchor.constraint(equalTo: bottomAnchor),
                 ])
-            
+
         }
 
         startObserveKeyboard()
+
+        layoutIfNeeded()
 
     }
 
@@ -100,6 +142,8 @@ public class FeuilleView: TouchThroughView {
             }
             return UIView.AnimationCurve.easeInOut.rawValue
         }
+
+        self.layoutIfNeeded()
 
         self.keyboardHeight.constant = keyboardHeight!
 
