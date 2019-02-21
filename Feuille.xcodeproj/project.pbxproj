@@ -39,7 +39,7 @@
 		D4954D05221E74EA007938DA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4954D08221E74EA007938DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4954D0A221E74EA007938DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D4954D0E221E7824007938DA /* FeuilleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeuilleView.swift; sourceTree = "<group>"; };
+		D4954D0E221E7824007938DA /* FeuilleView.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = FeuilleView.swift; sourceTree = "<group>"; };
 		D4954D10221E80D9007938DA /* BackDropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackDropView.swift; sourceTree = "<group>"; };
 		D4954D12221E80E5007938DA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */

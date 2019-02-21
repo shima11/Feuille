@@ -12,6 +12,8 @@ public class FeuilleView: UIView {
 
     private let backdropView = BackDropView()
     private let contentView = ContentView()
+  
+    private let keyboardLayoutGuide: UILayoutGuide = .init()
 
     public init() {
         super.init(frame: .zero)
@@ -19,6 +21,9 @@ public class FeuilleView: UIView {
         addSubview(backdropView)
         addSubview(contentView)
 
-
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
