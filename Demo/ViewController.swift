@@ -19,6 +19,7 @@ class ViewController: UIViewController {
 
     let customTextView = CustomInputView()
     let customBottomView = CustomBottomView()
+    let customTopView = CustomTopView()
 
     var height: NSLayoutConstraint!
 
@@ -40,21 +41,27 @@ class ViewController: UIViewController {
         feuilleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         feuilleView.set(middleView: customTextView)
 
-        customTextView.set(tapHandler: { [weak self] in
-
-            guard let self = self else { return }
-
-            self.feuilleView.set(bottomView: self.customBottomView)
-
-            _ = self.customTextView.resignFirstResponder()
-        })
+        customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
+        customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
 
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
         view.addGestureRecognizer(gesture)
 
     }
 
+    @objc func didTapPhotoButton() {
+
+        feuilleView.set(bottomView: customBottomView)
+        _ = customTextView.resignFirstResponder()
+    }
+
+    @objc func didTapPreviewButton() {
+
+        feuilleView.set(topView: customTopView)
+    }
+
     @objc func didTapView() {
+        
         _ = customTextView.resignFirstResponder()
         feuilleView.dismiss()
     }
@@ -67,6 +74,21 @@ class ViewController: UIViewController {
 
 }
 
+
+class CustomTopView: UIView {
+
+    init() {
+
+        super.init(frame: .zero)
+
+        backgroundColor = UIColor.darkGray.withAlphaComponent(0.4)
+
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
 class CustomBottomView: UIView {
 
@@ -85,8 +107,9 @@ class CustomBottomView: UIView {
 
 class CustomInputView: UIView {
 
+    public let photoButton = UIButton(type: .system)
+    public let previewButton = UIButton(type: .system)
     public let textView = UITextView()
-    public let button = UIButton(type: .system)
 
     override func becomeFirstResponder() -> Bool {
         return textView.becomeFirstResponder()
@@ -97,18 +120,12 @@ class CustomInputView: UIView {
         return textView.resignFirstResponder()
     }
 
-    var handler: (() -> Void) = {}
-
-    func set(tapHandler: @escaping () -> Void) {
-        handler = tapHandler
-    }
-
-
     init() {
         super.init(frame: .zero)
 
+        addSubview(photoButton)
+        addSubview(previewButton)
         addSubview(textView)
-        addSubview(button)
 
         backgroundColor = .white
 
@@ -117,26 +134,25 @@ class CustomInputView: UIView {
         textView.contentInset = .init(top: 8, left: 16, bottom: 8, right: 16)
         textView.font = UIFont.systemFont(ofSize: 16, weight: .regular)
 
-        button.setTitle("Photos", for: .normal)
+        photoButton.setTitle("Photos", for: .normal)
+        previewButton.setTitle("Preview", for: .normal)
 
-        button.easy.layout(
+        photoButton.easy.layout(
             Top(16),
             Left(16),
             Bottom(16)
         )
 
-        textView.easy.layout(
-            Left(16).to(button, .right),
-            CenterY().to(button),
-            Right(16)
+        previewButton.easy.layout(
+            Left(16).to(photoButton, .right),
+            CenterY().to(photoButton)
         )
 
-        button.addTarget(self, action: #selector(didTap), for: .touchUpInside)
-
-    }
-
-    @objc func didTap() {
-        handler()
+        textView.easy.layout(
+            Left(16).to(previewButton, .right),
+            CenterY().to(photoButton),
+            Right(16)
+        )
     }
 
     override func layoutSubviews() {

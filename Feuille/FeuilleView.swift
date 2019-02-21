@@ -21,11 +21,14 @@ public class FeuilleView: TouchThroughView {
 
     private var bottomViewHeight: NSLayoutConstraint!
 
+    private var topViewHeight: NSLayoutConstraint!
+
     // MARK: - Initializers
 
     public func dismiss() {
 
         set(constraint: bottomViewHeight, value: 0, animattion: true)
+        topViewHeight.constant = 0
     }
 
     public func set(bottomView view: UIView) {
@@ -34,6 +37,18 @@ public class FeuilleView: TouchThroughView {
 
         bottomView.set(bodyView: view)
     }
+
+    public func set(middleView view: UIView) {
+        middleView.set(bodyView: view)
+    }
+
+    public func set(topView view: UIView) {
+
+        topViewHeight.constant = 100
+
+        topView.set(bodyView: view)
+    }
+
 
     func set(constraint: NSLayoutConstraint, value: CGFloat, animattion: Bool){
 
@@ -54,11 +69,8 @@ public class FeuilleView: TouchThroughView {
         )
     }
 
-    public func set(middleView view: UIView) {
-        middleView.set(bodyView: view)
-    }
-
     public init() {
+        
         super.init(frame: .zero)
 
         do {
@@ -84,6 +96,9 @@ public class FeuilleView: TouchThroughView {
 
             topView.translatesAutoresizingMaskIntoConstraints = false
 
+            topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
+            topViewHeight.isActive = true
+
             NSLayoutConstraint.activate([
                 topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
                 topView.rightAnchor.constraint(equalTo: rightAnchor),
@@ -108,7 +123,8 @@ public class FeuilleView: TouchThroughView {
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
                 a,
-                b
+                b,
+                middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
                 ])
             
         }
