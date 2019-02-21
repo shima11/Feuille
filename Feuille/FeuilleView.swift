@@ -25,55 +25,12 @@ public class FeuilleView: TouchThroughView {
 
     // MARK: - Initializers
 
-    public func dismiss() {
-
-        set(constraint: bottomViewHeight, value: 0, animattion: true)
-        topViewHeight.constant = 0
-    }
-
-    public func set(bottomView view: UIView) {
-
-        set(constraint: bottomViewHeight, value: 200, animattion: true)
-
-        bottomView.set(bodyView: view)
-    }
-
-    public func set(middleView view: UIView) {
-        middleView.set(bodyView: view)
-    }
-
-    public func set(topView view: UIView) {
-
-        topViewHeight.constant = 100
-
-        topView.set(bodyView: view)
-    }
-
-
-    func set(constraint: NSLayoutConstraint, value: CGFloat, animattion: Bool){
-
-        let animationDuration = animattion ? 0.25 : 0
-
-        self.layoutIfNeeded()
-
-        constraint.constant = value
-
-        UIView.animate(
-            withDuration: animationDuration,
-            delay: 0,
-            options: .overrideInheritedCurve,
-            animations: {
-                self.layoutIfNeeded()
-        },
-            completion: nil
-        )
-    }
-
     public init() {
         
         super.init(frame: .zero)
 
-        do {
+        keyboardLayout: do {
+
             addLayoutGuide(keyboardLayoutGuide)
             
             let height = keyboardLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
@@ -92,12 +49,14 @@ public class FeuilleView: TouchThroughView {
         addSubview(middleView)
         addSubview(bottomView)
 
-        do {
+        topView: do {
 
             topView.translatesAutoresizingMaskIntoConstraints = false
 
             topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
             topViewHeight.isActive = true
+
+            #warning("Think about a top constraint")
 
             NSLayoutConstraint.activate([
                 topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
@@ -108,28 +67,28 @@ public class FeuilleView: TouchThroughView {
 
         }
 
-        do {
+        middleView: do {
 
             middleView.translatesAutoresizingMaskIntoConstraints = false
 
-            let a = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
-            a.priority = .defaultLow
-            let b = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
-            b.priority = .defaultLow
+            let constraint1 = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
+            constraint1.priority = .defaultLow
+            let constraint2 = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
+            constraint2.priority = .defaultLow
 
             NSLayoutConstraint.activate([
                 middleView.rightAnchor.constraint(equalTo: rightAnchor),
                 middleView.leftAnchor.constraint(equalTo: leftAnchor),
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-                a,
-                b,
+                constraint1,
+                constraint2,
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
                 ])
             
         }
 
-        do {
+        bottomView: do {
 
             bottomView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -146,8 +105,6 @@ public class FeuilleView: TouchThroughView {
 
         startObserveKeyboard()
 
-        layoutIfNeeded()
-
     }
 
 
@@ -160,6 +117,73 @@ public class FeuilleView: TouchThroughView {
     }
     
     // MARK: - Functions
+
+    public func set(bottomView view: UIView) {
+
+        topViewHeight.constant = 0
+
+        #warning("Think about a way to decide the bottomViewHeight.")
+
+        set(constraint: bottomViewHeight, value: 200, animated: true)
+
+        bottomView.set(bodyView: view)
+    }
+
+    public func set(middleView view: UIView) {
+
+        topViewHeight.constant = 0
+
+        middleView.set(bodyView: view)
+    }
+
+    public func set(topView view: UIView) {
+
+        #warning("Think about a way to decide the topViewHeight.")
+
+        topViewHeight.constant = 100
+
+        topView.set(bodyView: view)
+    }
+
+    public func dismiss() {
+
+        topViewHeight.constant = 0
+
+        set(constraint: bottomViewHeight, value: 0, animated: true)
+    }
+
+
+    private func set(
+        constraint: NSLayoutConstraint,
+        value: CGFloat,
+        animated: Bool,
+        animationDuration: TimeInterval = 0.25,
+        animationOptions: UIView.AnimationOptions = .overrideInheritedCurve
+        ){
+
+
+        if animated {
+
+            self.layoutIfNeeded()
+
+            constraint.constant = value
+
+            UIView.animate(
+                withDuration: animationDuration,
+                delay: 0,
+                options: animationOptions,
+                animations: {
+                    self.layoutIfNeeded()
+            },
+                completion: nil
+            )
+
+        } else {
+
+            constraint.constant = value
+
+        }
+    }
 
     private func startObserveKeyboard() {
         
@@ -198,19 +222,13 @@ public class FeuilleView: TouchThroughView {
             return UIView.AnimationCurve.easeInOut.rawValue
         }
 
-        self.layoutIfNeeded()
-
-        self.keyboardHeight.constant = keyboardHeight!
-
-        UIView.animate(
-            withDuration: animationDuration,
-            delay: 0,
-            options: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)),
-            animations: {
-                self.layoutIfNeeded()
-        },
-            completion: nil
+        set(
+            constraint: self.keyboardHeight,
+            value: keyboardHeight!,
+            animated: true,
+            animationDuration: animationDuration,
+            animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
         )
-        
+
     }
 }

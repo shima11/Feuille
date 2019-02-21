@@ -12,7 +12,7 @@ public class ContentView: UIView {
 
     private weak var bodyView: UIView? = nil
 
-    public func set(bodyView: UIView) {
+    func set(bodyView: UIView) {
 
         self.bodyView?.removeFromSuperview()
         addSubview(bodyView)
