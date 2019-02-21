@@ -17,8 +17,8 @@ class ViewController: UIViewController {
 
     let feuilleView = FeuilleView()
 
-    let textView = CustomInputView()
-    let bottomView = UIView()
+    let customTextView = CustomInputView()
+    let customBottomView = CustomBottomView()
 
     var height: NSLayoutConstraint!
 
@@ -27,40 +27,60 @@ class ViewController: UIViewController {
 
 
         let button = UIButton(type: .system)
-        button.setTitle("button", for: .normal)
-        button.titleLabel?.textColor = .darkText
-        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
-        button.frame = .init(x: 0, y: 0, width: 120, height: 60)
+        button.frame = .init(x: 0, y: 0, width: 80, height: 44)
         button.center = view.center
+        button.setTitle("Chat", for: .normal)
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
 
         view.addSubview(button)
-
         view.addSubview(feuilleView)
 
         feuilleView.frame = view.bounds
         feuilleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        feuilleView.set(middleView: customTextView)
 
-        bottomView.backgroundColor = .blue
-
-        textView.set(tapHandler: { [weak self] in
+        customTextView.set(tapHandler: { [weak self] in
 
             guard let self = self else { return }
 
-            self.feuilleView.bottomView.set(bodyView: self.bottomView)
+            self.feuilleView.set(bottomView: self.customBottomView)
 
-            _ = self.textView.resignFirstResponder()
+            _ = self.customTextView.resignFirstResponder()
         })
+
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
+        view.addGestureRecognizer(gesture)
+
     }
 
+    @objc func didTapView() {
+        _ = customTextView.resignFirstResponder()
+        feuilleView.dismiss()
+    }
 
     @objc func didTapButton() {
 
-        feuilleView.middleView.set(bodyView: textView)
-        _ = textView.becomeFirstResponder()
+        _ = customTextView.becomeFirstResponder()
 
     }
 
+}
 
+
+class CustomBottomView: UIView {
+
+    init() {
+
+        super.init(frame: .zero)
+
+        backgroundColor = .darkGray
+
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 class CustomInputView: UIView {
@@ -90,12 +110,15 @@ class CustomInputView: UIView {
         addSubview(textView)
         addSubview(button)
 
+        backgroundColor = .white
+
+        textView.backgroundColor = UIColor.groupTableViewBackground
         textView.isScrollEnabled = false
+        textView.contentInset = .init(top: 8, left: 16, bottom: 8, right: 16)
+        textView.font = UIFont.systemFont(ofSize: 16, weight: .regular)
 
-        button.setTitle("Hoge", for: .normal)
+        button.setTitle("Photos", for: .normal)
 
-        button.setContentHuggingPriority(.required, for: .horizontal)
-        
         button.easy.layout(
             Top(16),
             Left(16),
@@ -103,7 +126,7 @@ class CustomInputView: UIView {
         )
 
         textView.easy.layout(
-            Left().to(button, .right),
+            Left(16).to(button, .right),
             CenterY().to(button),
             Right(16)
         )
@@ -114,6 +137,11 @@ class CustomInputView: UIView {
 
     @objc func didTap() {
         handler()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        textView.layer.cornerRadius = textView.bounds.height / 2
     }
 
     required init?(coder aDecoder: NSCoder) {
