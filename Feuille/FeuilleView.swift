@@ -8,12 +8,11 @@
 
 import Foundation
 
-public class FeuilleView: UIView {
+public class FeuilleView: TouchThroughView {
     
     // MARK: - Properties
 
     public let contentView = ContentView()
-    private let backdropView = BackDropView()
 
     private let keyboardLayoutGuide: UILayoutGuide = .init()
     private var keyboardHeight: NSLayoutConstraint!
@@ -22,11 +21,6 @@ public class FeuilleView: UIView {
 
     public init() {
         super.init(frame: .zero)
-
-        addSubview(backdropView)
-        addSubview(contentView)
-
-        backdropView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         do {
             addLayoutGuide(keyboardLayoutGuide)
@@ -44,6 +38,8 @@ public class FeuilleView: UIView {
         }
 
         do {
+            addSubview(contentView)
+
             contentView.translatesAutoresizingMaskIntoConstraints = false
 
             NSLayoutConstraint.activate([
@@ -51,6 +47,7 @@ public class FeuilleView: UIView {
                 contentView.leftAnchor.constraint(equalTo: leftAnchor),
                 contentView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
                 ])
+            
         }
 
         startObserveKeyboard()

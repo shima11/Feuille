@@ -13,23 +13,37 @@ class ViewController: UIViewController {
 
     let feuilleView = FeuilleView()
 
+    let textView = UITextView()
+
+    var height: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+
+        let button = UIButton(type: .system)
+        button.setTitle("button", for: .normal)
+        button.titleLabel?.textColor = .darkText
+        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        button.frame = .init(x: 0, y: 0, width: 120, height: 60)
+        button.center = view.center
+
+        view.addSubview(button)
 
         view.addSubview(feuilleView)
 
         feuilleView.frame = view.bounds
         feuilleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        let inputView = UITextView()
-        inputView.backgroundColor = .red
+        textView.backgroundColor = .red
+        textView.isScrollEnabled = false
+    }
 
-        inputView.heightAnchor.constraint(equalToConstant: 100).isActive = true
 
-        inputView.becomeFirstResponder()
+    @objc func didTapButton() {
 
-        feuilleView.contentView.set(bodyView: inputView)
-
+        feuilleView.contentView.set(bodyView: textView)
+        textView.becomeFirstResponder()
 
     }
 

@@ -29,8 +29,5 @@ public class ContentView: UIView {
 
     }
 
-    public override var intrinsicContentSize: CGSize {
-        return .init(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
-    }
 
 }
