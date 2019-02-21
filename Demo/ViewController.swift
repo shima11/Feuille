@@ -11,7 +11,7 @@ import Feuille
 
 class ViewController: UIViewController {
 
-    let feuilleView = FeuilleView(frame: .zero)
+    let feuilleView = FeuilleView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
