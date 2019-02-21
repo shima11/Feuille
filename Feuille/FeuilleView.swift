@@ -14,7 +14,7 @@ public class FeuilleView: UIView {
 
     private let backdropView = BackDropView()
     private let contentView = ContentView()
-  
+
     private let keyboardLayoutGuide: UILayoutGuide = .init()
     private var keyboardHeight: NSLayoutConstraint!
     
@@ -25,7 +25,11 @@ public class FeuilleView: UIView {
 
         addSubview(backdropView)
         addSubview(contentView)
-        
+
+        backdropView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        contentView.translatesAutoresizingMaskIntoConstraints = true
+
         do {            
             addLayoutGuide(keyboardLayoutGuide)
             
@@ -40,12 +44,12 @@ public class FeuilleView: UIView {
                 ])
             
         }
+
     }
-    
+
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -102,5 +106,10 @@ public class FeuilleView: UIView {
             completion: nil
         )
         
+        func set(contentView view: UIView) {
+            
+            contentView.addSubview(view)
+            contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
     }
 }
