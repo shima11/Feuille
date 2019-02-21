@@ -7,12 +7,17 @@
 //
 
 import UIKit
+import Feuille
 
 class ViewController: UIViewController {
 
+    let feuilleView = FeuilleView(frame: .zero)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+        view.addSubview(feuilleView)
+
     }
 
 

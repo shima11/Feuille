@@ -13,7 +13,20 @@
 		D4954D04221E74E9007938DA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4954D02221E74E9007938DA /* Main.storyboard */; };
 		D4954D06221E74EA007938DA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4954D05221E74EA007938DA /* Assets.xcassets */; };
 		D4954D09221E74EA007938DA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4954D07221E74EA007938DA /* LaunchScreen.storyboard */; };
+		D4954D0F221E7824007938DA /* FeuilleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4954D0E221E7824007938DA /* FeuilleView.swift */; };
+		D4954D11221E80D9007938DA /* BackDropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4954D10221E80D9007938DA /* BackDropView.swift */; };
+		D4954D13221E80E5007938DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4954D12221E80E5007938DA /* ContentView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D4954D1A221E8A3D007938DA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4954CE4221E74D1007938DA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4954CEC221E74D1007938DA;
+			remoteInfo = Feuille;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		D4954CED221E74D1007938DA /* Feuille.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Feuille.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -26,6 +39,9 @@
 		D4954D05221E74EA007938DA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4954D08221E74EA007938DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4954D0A221E74EA007938DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D4954D0E221E7824007938DA /* FeuilleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeuilleView.swift; sourceTree = "<group>"; };
+		D4954D10221E80D9007938DA /* BackDropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackDropView.swift; sourceTree = "<group>"; };
+		D4954D12221E80E5007938DA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +84,9 @@
 			isa = PBXGroup;
 			children = (
 				D4954CF0221E74D1007938DA /* Feuille.h */,
+				D4954D0E221E7824007938DA /* FeuilleView.swift */,
+				D4954D10221E80D9007938DA /* BackDropView.swift */,
+				D4954D12221E80E5007938DA /* ContentView.swift */,
 				D4954CF1221E74D1007938DA /* Info.plist */,
 			);
 			path = Feuille;
@@ -129,6 +148,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D4954D1B221E8A3D007938DA /* PBXTargetDependency */,
 			);
 			name = Demo;
 			productName = Demo;
@@ -147,6 +167,7 @@
 				TargetAttributes = {
 					D4954CEC221E74D1007938DA = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1010;
 					};
 					D4954CFB221E74E9007938DA = {
 						CreatedOnToolsVersion = 10.1;
@@ -197,6 +218,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4954D11221E80D9007938DA /* BackDropView.swift in Sources */,
+				D4954D0F221E7824007938DA /* FeuilleView.swift in Sources */,
+				D4954D13221E80E5007938DA /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +234,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D4954D1B221E8A3D007938DA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D4954CEC221E74D1007938DA /* Feuille */;
+			targetProxy = D4954D1A221E8A3D007938DA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		D4954D02221E74E9007938DA /* Main.storyboard */ = {
@@ -356,6 +388,7 @@
 		D4954CF6221E74D1007938DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -372,6 +405,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.shima.app.Feuille;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -380,6 +414,7 @@
 		D4954CF7221E74D1007938DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
