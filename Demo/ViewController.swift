@@ -17,6 +17,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
 
         view.addSubview(feuilleView)
+        feuilleView.frame = view.bounds
+        
 
     }
 
