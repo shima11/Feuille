@@ -12,12 +12,12 @@ public class FeuilleView: UIView {
     
     // MARK: - Properties
 
+    public let contentView = ContentView()
     private let backdropView = BackDropView()
-    private let contentView = ContentView()
 
     private let keyboardLayoutGuide: UILayoutGuide = .init()
     private var keyboardHeight: NSLayoutConstraint!
-    
+
     // MARK: - Initializers
 
     public init() {
@@ -28,14 +28,12 @@ public class FeuilleView: UIView {
 
         backdropView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        contentView.translatesAutoresizingMaskIntoConstraints = true
-
-        do {            
+        do {
             addLayoutGuide(keyboardLayoutGuide)
             
             let height = keyboardLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
             self.keyboardHeight = height
-            
+
             NSLayoutConstraint.activate([
                 height,
                 keyboardLayoutGuide.rightAnchor.constraint(equalTo: rightAnchor),
@@ -44,6 +42,18 @@ public class FeuilleView: UIView {
                 ])
             
         }
+
+        do {
+            contentView.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                contentView.rightAnchor.constraint(equalTo: rightAnchor),
+                contentView.leftAnchor.constraint(equalTo: leftAnchor),
+                contentView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
+                ])
+        }
+
+        startObserveKeyboard()
 
     }
 
@@ -56,7 +66,7 @@ public class FeuilleView: UIView {
     }
     
     // MARK: - Functions
-    
+
     private func startObserveKeyboard() {
         
         NotificationCenter.default.addObserver(
@@ -75,7 +85,6 @@ public class FeuilleView: UIView {
             guard let v = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
                 return nil
             }
-            
             let screenHeight = UIScreen.main.bounds.height
             return screenHeight - v.cgRectValue.minY
         }
@@ -94,22 +103,18 @@ public class FeuilleView: UIView {
             }
             return UIView.AnimationCurve.easeInOut.rawValue
         }
-        
+
+        self.keyboardHeight.constant = keyboardHeight!
+
         UIView.animate(
             withDuration: animationDuration,
             delay: 0,
             options: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)),
             animations: {
-                self.keyboardHeight.constant = -keyboardHeight!
                 self.layoutIfNeeded()
         },
             completion: nil
         )
         
-        func set(contentView view: UIView) {
-            
-            contentView.addSubview(view)
-            contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        }
     }
 }

@@ -8,6 +8,29 @@
 
 import Foundation
 
-class ContentView: UIView {
-    
+public class ContentView: UIView {
+
+    private weak var bodyView: UIView? = nil
+
+    public func set(bodyView: UIView) {
+
+        self.bodyView?.removeFromSuperview()
+        addSubview(bodyView)
+        self.bodyView = bodyView
+
+        bodyView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            bodyView.topAnchor.constraint(equalTo: topAnchor),
+            bodyView.leftAnchor.constraint(equalTo: leftAnchor),
+            bodyView.rightAnchor.constraint(equalTo: rightAnchor),
+            bodyView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+
+    }
+
+    public override var intrinsicContentSize: CGSize {
+        return .init(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+    }
+
 }
