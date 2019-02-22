@@ -23,6 +23,12 @@ public class FeuilleView: TouchThroughView {
 
     private var topViewHeight: NSLayoutConstraint!
 
+    private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
+    private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
+
+//    private var bottomMiddleToKeyboardLessThanConstraint: NSLayoutConstraint!
+//    private var bottomMiddleToBottomLessThanConstraint: NSLayoutConstraint!
+
     // MARK: - Initializers
 
     public init() {
@@ -71,18 +77,23 @@ public class FeuilleView: TouchThroughView {
 
             middleView.translatesAutoresizingMaskIntoConstraints = false
 
-            let constraint1 = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
-            constraint1.priority = .defaultLow
-            let constraint2 = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
-            constraint2.priority = .defaultLow
+            bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
+            bottomMiddleToKeyboardConstraint.priority = .defaultLow
+            bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
+            bottomMiddleToBottomConstraint.priority = .defaultLow
+//
+//            bottomMiddleToKeyboardLessThanConstraint = middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor)
+//            bottomMiddleToBottomLessThanConstraint = middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor)
 
             NSLayoutConstraint.activate([
                 middleView.rightAnchor.constraint(equalTo: rightAnchor),
                 middleView.leftAnchor.constraint(equalTo: leftAnchor),
+//                bottomMiddleToKeyboardLessThanConstraint,
+//                bottomMiddleToBottomLessThanConstraint,
+                bottomMiddleToKeyboardConstraint,
+                bottomMiddleToBottomConstraint,
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-                constraint1,
-                constraint2,
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
                 ])
             
@@ -98,7 +109,7 @@ public class FeuilleView: TouchThroughView {
             NSLayoutConstraint.activate([
                 bottomView.rightAnchor.constraint(equalTo: rightAnchor),
                 bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-                bottomView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
                 ])
 
         }
@@ -120,13 +131,21 @@ public class FeuilleView: TouchThroughView {
 
     public func set(bottomView view: UIView) {
 
-        topViewHeight.constant = 0
-
+        #warning("貼り付けられるViewが切り替わるときの対応。高さが異なる可能性も考慮。")
+        #warning("LINEみたいに中身が縦スクロール可能で、全画面表示への遷移が発生する場合。")
         #warning("Think about a way to decide the bottomViewHeight.")
 
-        set(constraint: bottomViewHeight, value: 200, animated: true)
+        topViewHeight.constant = 0
 
         bottomView.set(bodyView: view)
+
+        set(constraint: bottomViewHeight, value: 400, animated: true)
+
+        // idea
+//        bottomView.layoutIfNeeded()
+//        let height = bottomView.intrinsicContentSize.height
+//        set(constraint: bottomViewHeight, value: height, animated: true)
+
     }
 
     public func set(middleView view: UIView) {
@@ -161,10 +180,7 @@ public class FeuilleView: TouchThroughView {
         animationOptions: UIView.AnimationOptions = .overrideInheritedCurve
         ){
 
-
         if animated {
-
-            self.layoutIfNeeded()
 
             constraint.constant = value
 
@@ -220,6 +236,10 @@ public class FeuilleView: TouchThroughView {
                 return number.intValue
             }
             return UIView.AnimationCurve.easeInOut.rawValue
+        }
+
+        if let height = keyboardHeight, height > 0 {
+            bottomViewHeight.constant = 0
         }
 
         set(

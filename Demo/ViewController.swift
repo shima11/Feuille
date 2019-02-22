@@ -18,8 +18,10 @@ class ViewController: UIViewController {
     let feuilleView = FeuilleView()
 
     let customTextView = CustomInputView()
-    let customBottomView = CustomBottomView()
     let customTopView = CustomTopView()
+
+    let photosView = CustomBottomView()
+    let stanpView = CustomBottomView()
 
     var height: NSLayoutConstraint!
 
@@ -32,7 +34,7 @@ class ViewController: UIViewController {
         button.center = view.center
         button.setTitle("Chat", for: .normal)
         button.setContentHuggingPriority(.required, for: .horizontal)
-        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didTapChatButton), for: .touchUpInside)
 
         view.addSubview(button)
         view.addSubview(feuilleView)
@@ -43,6 +45,10 @@ class ViewController: UIViewController {
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
+        customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
+
+        photosView.backgroundColor = .darkGray
+        stanpView.backgroundColor = .orange
 
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
         view.addGestureRecognizer(gesture)
@@ -51,7 +57,8 @@ class ViewController: UIViewController {
 
     @objc func didTapPhotoButton() {
 
-        feuilleView.set(bottomView: customBottomView)
+        feuilleView.set(bottomView: photosView)
+
         _ = customTextView.resignFirstResponder()
     }
 
@@ -60,13 +67,20 @@ class ViewController: UIViewController {
         feuilleView.set(topView: customTopView)
     }
 
+    @objc func didTapStanpButton() {
+
+        feuilleView.set(bottomView: stanpView)
+
+        _ = customTextView.resignFirstResponder()
+    }
+
     @objc func didTapView() {
 
         _ = customTextView.resignFirstResponder()
         feuilleView.dismiss()
     }
 
-    @objc func didTapButton() {
+    @objc func didTapChatButton() {
 
         _ = customTextView.becomeFirstResponder()
 
@@ -96,7 +110,7 @@ class CustomBottomView: UIView {
 
         super.init(frame: .zero)
 
-        backgroundColor = .darkGray
+//        backgroundColor = .darkGray
 
     }
     
@@ -109,6 +123,7 @@ class CustomInputView: UIView {
 
     public let photoButton = UIButton(type: .system)
     public let previewButton = UIButton(type: .system)
+    public let stanpButton = UIButton(type: .system)
     public let textView = UITextView()
 
     override func becomeFirstResponder() -> Bool {
@@ -125,6 +140,7 @@ class CustomInputView: UIView {
 
         addSubview(photoButton)
         addSubview(previewButton)
+        addSubview(stanpButton)
         addSubview(textView)
 
         backgroundColor = .white
@@ -134,8 +150,13 @@ class CustomInputView: UIView {
         textView.contentInset = .init(top: 8, left: 16, bottom: 8, right: 16)
         textView.font = UIFont.systemFont(ofSize: 16, weight: .regular)
 
-        photoButton.setTitle("Photos", for: .normal)
+        photoButton.setTitle("Photo", for: .normal)
         previewButton.setTitle("Preview", for: .normal)
+        stanpButton.setTitle("Stanp", for: .normal)
+
+        photoButton.setContentHuggingPriority(.required, for: .horizontal)
+        previewButton.setContentHuggingPriority(.required, for: .horizontal)
+        stanpButton.setContentHuggingPriority(.required, for: .horizontal)
 
         photoButton.easy.layout(
             Top(16),
@@ -148,8 +169,13 @@ class CustomInputView: UIView {
             CenterY().to(photoButton)
         )
 
-        textView.easy.layout(
+        stanpButton.easy.layout(
             Left(16).to(previewButton, .right),
+            CenterY().to(photoButton)
+        )
+
+        textView.easy.layout(
+            Left(16).to(stanpButton, .right),
             CenterY().to(photoButton),
             Right(16)
         )
