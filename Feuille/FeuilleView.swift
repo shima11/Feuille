@@ -26,9 +26,6 @@ public class FeuilleView: TouchThroughView {
     private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
     private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
 
-//    private var bottomMiddleToKeyboardLessThanConstraint: NSLayoutConstraint!
-//    private var bottomMiddleToBottomLessThanConstraint: NSLayoutConstraint!
-
     // MARK: - Initializers
 
     public init() {
@@ -81,15 +78,10 @@ public class FeuilleView: TouchThroughView {
             bottomMiddleToKeyboardConstraint.priority = .defaultLow
             bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
             bottomMiddleToBottomConstraint.priority = .defaultLow
-//
-//            bottomMiddleToKeyboardLessThanConstraint = middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor)
-//            bottomMiddleToBottomLessThanConstraint = middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor)
 
             NSLayoutConstraint.activate([
                 middleView.rightAnchor.constraint(equalTo: rightAnchor),
                 middleView.leftAnchor.constraint(equalTo: leftAnchor),
-//                bottomMiddleToKeyboardLessThanConstraint,
-//                bottomMiddleToBottomLessThanConstraint,
                 bottomMiddleToKeyboardConstraint,
                 bottomMiddleToBottomConstraint,
                 middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
@@ -131,43 +123,33 @@ public class FeuilleView: TouchThroughView {
 
     public func set(bottomView view: UIView) {
 
-        #warning("貼り付けられるViewが切り替わるときの対応。高さが異なる可能性も考慮。")
-        #warning("LINEみたいに中身が縦スクロール可能で、全画面表示への遷移が発生する場合。")
         #warning("Think about a way to decide the bottomViewHeight.")
-
-        topViewHeight.constant = 0
 
         bottomView.set(bodyView: view)
 
-        set(constraint: bottomViewHeight, value: 400, animated: true)
-
-        // idea
-//        bottomView.layoutIfNeeded()
-//        let height = bottomView.intrinsicContentSize.height
-//        set(constraint: bottomViewHeight, value: height, animated: true)
-
+        set(constraint: topViewHeight, value: 0, animated: false)
+        set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: true)
     }
 
     public func set(middleView view: UIView) {
 
-        topViewHeight.constant = 0
-
         middleView.set(bodyView: view)
+
+        set(constraint: topViewHeight, value: 0, animated: false)
     }
 
     public func set(topView view: UIView) {
 
         #warning("Think about a way to decide the topViewHeight.")
 
-        topViewHeight.constant = 100
-
         topView.set(bodyView: view)
+
+        set(constraint: topViewHeight, value: 100, animated: false)
     }
 
     public func dismiss() {
 
-        topViewHeight.constant = 0
-
+        set(constraint: topViewHeight, value: 0, animated: false)
         set(constraint: bottomViewHeight, value: 0, animated: true)
     }
 

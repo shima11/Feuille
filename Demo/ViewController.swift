@@ -20,8 +20,8 @@ class ViewController: UIViewController {
     let customTextView = CustomInputView()
     let customTopView = CustomTopView()
 
-    let photosView = CustomBottomView()
-    let stanpView = CustomBottomView()
+    let photosView = PhotosView()
+    let stanpView = StanpView()
 
     var height: NSLayoutConstraint!
 
@@ -104,16 +104,40 @@ class CustomTopView: UIView {
     }
 }
 
-class CustomBottomView: UIView {
+class PhotosView: UIView {
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: UIView.noIntrinsicMetric, height: 400)
+    }
 
     init() {
 
         super.init(frame: .zero)
 
-//        backgroundColor = .darkGray
+        backgroundColor = .darkGray
 
     }
     
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class StanpView: UIView {
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: UIView.noIntrinsicMetric, height: 200)
+    }
+
+
+    init() {
+
+        super.init(frame: .zero)
+
+        backgroundColor = .orange
+
+    }
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
