@@ -41,7 +41,7 @@ class ViewController: UIViewController {
 
         feuilleView.frame = view.bounds
         feuilleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        feuilleView.set(middleView: customTextView)
+        feuilleView.set(middleView: customTextView, animated: true)
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
@@ -57,19 +57,19 @@ class ViewController: UIViewController {
 
     @objc func didTapPhotoButton() {
 
-        feuilleView.set(bottomView: photosView)
+        feuilleView.set(bottomView: photosView, animated: true)
 
         _ = customTextView.resignFirstResponder()
     }
 
     @objc func didTapPreviewButton() {
 
-        feuilleView.set(topView: customTopView)
+        feuilleView.set(topView: customTopView, animated: true)
     }
 
     @objc func didTapStanpButton() {
 
-        feuilleView.set(bottomView: stanpView)
+        feuilleView.set(bottomView: stanpView, animated: true)
 
         _ = customTextView.resignFirstResponder()
     }
@@ -77,7 +77,7 @@ class ViewController: UIViewController {
     @objc func didTapView() {
 
         _ = customTextView.resignFirstResponder()
-        feuilleView.dismiss()
+        feuilleView.dismiss(animated: true)
     }
 
     @objc func didTapChatButton() {

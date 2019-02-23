@@ -9,237 +9,240 @@
 import Foundation
 
 public class FeuilleView: TouchThroughView {
-    
-    // MARK: - Properties
 
-    public let topView = ContentView()
-    public let middleView = ContentView()
-    public let bottomView = ContentView()
+  // MARK: - Properties
 
-    private let keyboardLayoutGuide: UILayoutGuide = .init()
-    private var keyboardHeight: NSLayoutConstraint!
+  public let topView = ContentView()
+  public let middleView = ContentView()
+  public let bottomView = ContentView()
 
-    private var bottomViewHeight: NSLayoutConstraint!
+  private let keyboardLayoutGuide: UILayoutGuide = .init()
+  private var keyboardHeight: NSLayoutConstraint!
 
-    private var topViewHeight: NSLayoutConstraint!
+  private var bottomViewHeight: NSLayoutConstraint!
 
-    private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
-    private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
+  private var topViewHeight: NSLayoutConstraint!
 
-    // MARK: - Initializers
+  private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
+  private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
 
-    public init() {
-        
-        super.init(frame: .zero)
+  // MARK: - Initializers
 
-        keyboardLayout: do {
+  public init() {
 
-            addLayoutGuide(keyboardLayoutGuide)
-            
-            let height = keyboardLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
-            self.keyboardHeight = height
+    super.init(frame: .zero)
 
-            NSLayoutConstraint.activate([
-                height,
-                keyboardLayoutGuide.rightAnchor.constraint(equalTo: rightAnchor),
-                keyboardLayoutGuide.leftAnchor.constraint(equalTo: leftAnchor),
-                keyboardLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
-                ])
-            
-        }
+    keyboardLayout: do {
 
-        addSubview(topView)
-        addSubview(middleView)
-        addSubview(bottomView)
+      addLayoutGuide(keyboardLayoutGuide)
 
-        topView: do {
+      let height = keyboardLayoutGuide.heightAnchor.constraint(equalToConstant: 0)
+      self.keyboardHeight = height
 
-            topView.translatesAutoresizingMaskIntoConstraints = false
-
-            topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
-            topViewHeight.isActive = true
-
-            #warning("Think about a top constraint")
-
-            NSLayoutConstraint.activate([
-                topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
-                topView.rightAnchor.constraint(equalTo: rightAnchor),
-                topView.leftAnchor.constraint(equalTo: leftAnchor),
-                topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
-                ])
-
-        }
-
-        middleView: do {
-
-            middleView.translatesAutoresizingMaskIntoConstraints = false
-
-            bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
-            bottomMiddleToKeyboardConstraint.priority = .defaultLow
-            bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
-            bottomMiddleToBottomConstraint.priority = .defaultLow
-
-            if #available(iOS 11.0, *) {
-                NSLayoutConstraint.activate([
-                    middleView.rightAnchor.constraint(equalTo: rightAnchor),
-                    middleView.leftAnchor.constraint(equalTo: leftAnchor),
-                    bottomMiddleToKeyboardConstraint,
-                    bottomMiddleToBottomConstraint,
-                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
-                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
-                    ])
-            } else {
-                // Fallback on earlier versions
-            }
-
-        }
-
-        bottomView: do {
-
-            bottomView.translatesAutoresizingMaskIntoConstraints = false
-
-            bottomViewHeight = bottomView.heightAnchor.constraint(equalToConstant: 0)
-            bottomViewHeight.isActive = true
-
-            if #available(iOS 11.0, *) {
-                NSLayoutConstraint.activate([
-                    bottomView.rightAnchor.constraint(equalTo: rightAnchor),
-
-                    bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-                    bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-                    ])
-            } else {
-                // Fallback on earlier versions
-            }
-
-        }
-
-        startObserveKeyboard()
+      NSLayoutConstraint.activate([
+        height,
+        keyboardLayoutGuide.rightAnchor.constraint(equalTo: rightAnchor),
+        keyboardLayoutGuide.leftAnchor.constraint(equalTo: leftAnchor),
+        keyboardLayoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
 
     }
 
+    addSubview(topView)
+    addSubview(middleView)
+    addSubview(bottomView)
 
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    // MARK: - Functions
+    topView: do {
 
-    public func set(bottomView view: UIView) {
+      topView.translatesAutoresizingMaskIntoConstraints = false
 
-        #warning("Think about a way to decide the bottomViewHeight.")
+      topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
+      topViewHeight.isActive = true
 
-        bottomView.set(bodyView: view)
+      #warning("Think about a top constraint")
 
-        set(constraint: topViewHeight, value: 0, animated: false)
-        set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: true)
-    }
-
-    public func set(middleView view: UIView) {
-
-        middleView.set(bodyView: view)
-
-        set(constraint: topViewHeight, value: 0, animated: false)
-    }
-
-    public func set(topView view: UIView) {
-
-        #warning("Think about a way to decide the topViewHeight.")
-
-        topView.set(bodyView: view)
-
-        set(constraint: topViewHeight, value: 100, animated: false)
-    }
-
-    public func dismiss() {
-
-        set(constraint: topViewHeight, value: 0, animated: false)
-        set(constraint: bottomViewHeight, value: 0, animated: true)
-    }
-
-
-    private func set(
-        constraint: NSLayoutConstraint,
-        value: CGFloat,
-        animated: Bool,
-        animationDuration: TimeInterval = 0.25,
-        animationOptions: UIView.AnimationOptions = .overrideInheritedCurve
-        ){
-
-        if animated {
-
-            constraint.constant = value
-
-            UIView.animate(
-                withDuration: animationDuration,
-                delay: 0,
-                options: animationOptions,
-                animations: {
-                    self.layoutIfNeeded()
-            },
-                completion: nil
-            )
-
-        } else {
-
-            constraint.constant = value
-
-        }
-    }
-
-    private func startObserveKeyboard() {
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillChangeFrame(_:)),
-            name: UIResponder.keyboardWillChangeFrameNotification,
-            object: nil
-        )
-        
-    }
-    
-    @objc
-    private func keyboardWillChangeFrame(_ note: Notification) {
-        
-        var keyboardHeight: CGFloat? {
-            guard let v = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
-                return nil
-            }
-            let screenHeight = UIScreen.main.bounds.height
-            return screenHeight - v.cgRectValue.minY
-        }
-        
-        var animationDuration: Double {
-            if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
-                return number.doubleValue
-            } else {
-                return 0.25
-            }
-        }
-        
-        var animationCurve: Int {
-            if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
-                return number.intValue
-            }
-            return UIView.AnimationCurve.easeInOut.rawValue
-        }
-
-        if let height = keyboardHeight, height > 0 {
-            bottomViewHeight.constant = 0
-        }
-
-        set(
-            constraint: self.keyboardHeight,
-            value: keyboardHeight!,
-            animated: true,
-            animationDuration: animationDuration,
-            animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
-        )
+      NSLayoutConstraint.activate([
+        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
+        topView.rightAnchor.constraint(equalTo: rightAnchor),
+        topView.leftAnchor.constraint(equalTo: leftAnchor),
+        topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
+        ])
 
     }
+
+    middleView: do {
+
+      middleView.translatesAutoresizingMaskIntoConstraints = false
+
+      bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
+      bottomMiddleToKeyboardConstraint.priority = .defaultLow
+      bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
+      bottomMiddleToBottomConstraint.priority = .defaultLow
+
+      if #available(iOS 11.0, *) {
+        NSLayoutConstraint.activate([
+          middleView.rightAnchor.constraint(equalTo: rightAnchor),
+          middleView.leftAnchor.constraint(equalTo: leftAnchor),
+          bottomMiddleToKeyboardConstraint,
+          bottomMiddleToBottomConstraint,
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
+          ])
+      } else {
+        // Fallback on earlier versions
+      }
+
+    }
+
+    bottomView: do {
+
+      bottomView.translatesAutoresizingMaskIntoConstraints = false
+
+      bottomViewHeight = bottomView.heightAnchor.constraint(equalToConstant: 0)
+      bottomViewHeight.isActive = true
+
+      if #available(iOS 11.0, *) {
+        NSLayoutConstraint.activate([
+          bottomView.rightAnchor.constraint(equalTo: rightAnchor),
+
+          bottomView.leftAnchor.constraint(equalTo: leftAnchor),
+          bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+          ])
+      } else {
+        // Fallback on earlier versions
+      }
+
+    }
+
+    startObserveKeyboard()
+
+  }
+
+
+  public required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  // MARK: - Functions
+
+  public func set(bottomView view: UIView, animated: Bool) {
+
+    #warning("Think about a way to decide the bottomViewHeight.")
+
+    bottomView.set(bodyView: view)
+
+    set(constraint: topViewHeight, value: 0, animated: animated)
+
+    set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+  }
+
+  public func set(middleView view: UIView, animated: Bool) {
+
+    middleView.set(bodyView: view)
+
+    set(constraint: topViewHeight, value: 0, animated: animated)
+  }
+
+  public func set(topView view: UIView, animated: Bool) {
+
+    #warning("Think about a way to decide the topViewHeight.")
+
+    topView.set(bodyView: view)    
+
+    set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+  }
+
+  public func dismiss(animated: Bool) {
+
+    set(constraint: topViewHeight, value: 0, animated: animated)
+    set(constraint: bottomViewHeight, value: 0, animated: animated)
+  }
+
+
+  private func set(
+    constraint: NSLayoutConstraint,
+    value: CGFloat,
+    animated: Bool,
+    animationDuration: TimeInterval = 0.25,
+    animationOptions: UIView.AnimationOptions = .overrideInheritedCurve
+    ){
+
+    if animated {
+
+      constraint.constant = value
+
+      UIView.animate(
+        withDuration: animationDuration,
+        delay: 0,
+        options: animationOptions,
+        animations: {
+          self.layoutIfNeeded()
+      },
+        completion: nil
+      )
+
+    } else {
+
+      constraint.constant = value
+
+    }
+  }
+
+  private func startObserveKeyboard() {
+
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillChangeFrame(_:)),
+      name: UIResponder.keyboardWillChangeFrameNotification,
+      object: nil
+    )
+
+  }
+
+  @objc
+  private func keyboardWillChangeFrame(_ note: Notification) {
+
+    var keyboardHeight: CGFloat? {
+      guard let v = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
+        return nil
+      }
+      let screenHeight = UIScreen.main.bounds.height
+      return screenHeight - v.cgRectValue.minY
+    }
+
+    var animationDuration: Double {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
+        return number.doubleValue
+      } else {
+        return 0.25
+      }
+    }
+
+    var animationCurve: Int {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
+        return number.intValue
+      }
+      return UIView.AnimationCurve.easeInOut.rawValue
+    }
+
+    print("height:", keyboardHeight)
+
+    if let height = keyboardHeight, height > 0 {
+      bottomViewHeight.constant = 0
+    }
+
+    set(
+      constraint: self.keyboardHeight,
+      value: keyboardHeight!,
+      animated: true,
+      animationDuration: animationDuration,
+      animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
+    )
+
+  }
 }
