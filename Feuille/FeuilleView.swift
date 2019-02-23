@@ -79,16 +79,20 @@ public class FeuilleView: TouchThroughView {
             bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
             bottomMiddleToBottomConstraint.priority = .defaultLow
 
-            NSLayoutConstraint.activate([
-                middleView.rightAnchor.constraint(equalTo: rightAnchor),
-                middleView.leftAnchor.constraint(equalTo: leftAnchor),
-                bottomMiddleToKeyboardConstraint,
-                bottomMiddleToBottomConstraint,
-                middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
-                middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-                middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
-                ])
-            
+            if #available(iOS 11.0, *) {
+                NSLayoutConstraint.activate([
+                    middleView.rightAnchor.constraint(equalTo: rightAnchor),
+                    middleView.leftAnchor.constraint(equalTo: leftAnchor),
+                    bottomMiddleToKeyboardConstraint,
+                    bottomMiddleToBottomConstraint,
+                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
+                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
+                    middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
+                    ])
+            } else {
+                // Fallback on earlier versions
+            }
+
         }
 
         bottomView: do {
@@ -98,11 +102,16 @@ public class FeuilleView: TouchThroughView {
             bottomViewHeight = bottomView.heightAnchor.constraint(equalToConstant: 0)
             bottomViewHeight.isActive = true
 
-            NSLayoutConstraint.activate([
-                bottomView.rightAnchor.constraint(equalTo: rightAnchor),
-                bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-                bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-                ])
+            if #available(iOS 11.0, *) {
+                NSLayoutConstraint.activate([
+                    bottomView.rightAnchor.constraint(equalTo: rightAnchor),
+
+                    bottomView.leftAnchor.constraint(equalTo: leftAnchor),
+                    bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+                    ])
+            } else {
+                // Fallback on earlier versions
+            }
 
         }
 
