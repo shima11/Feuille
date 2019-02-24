@@ -8,6 +8,14 @@
 
 import Foundation
 
+public protocol FeuilleViewDelegate: class {
+
+  func didChangeTopHeight(height: CGFloat)
+  func didChangeMiddleHeight(height: CGFloat)
+  func didChangeBottomHeight(height: CGFloat)
+
+}
+
 public class FeuilleView: TouchThroughView {
 
   public enum ItemType {
@@ -29,6 +37,8 @@ public class FeuilleView: TouchThroughView {
 
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
   private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
+
+  public weak var delegate: FeuilleViewDelegate?
 
   // MARK: - Initializers
 
@@ -154,11 +164,14 @@ public class FeuilleView: TouchThroughView {
 
   // MARK: - Functions
 
-  public func set(bottomView view: UIView, animated: Bool) {
+  public func set(topView view: UIView, animated: Bool) {
 
-    bottomView.set(bodyView: view)
+    topView.set(bodyView: view)
 
-    set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+    set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+
+    delegate?.didChangeTopHeight(height: view.intrinsicContentSize.height)
+
   }
 
   public func set(middleView view: UIView, animated: Bool) {
@@ -166,25 +179,32 @@ public class FeuilleView: TouchThroughView {
     middleView.set(bodyView: view)
     set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
+    delegate?.didChangeMiddleHeight(height: view.intrinsicContentSize.height)
+
   }
 
-  public func set(topView view: UIView, animated: Bool) {
+  public func set(bottomView view: UIView, animated: Bool) {
 
-    topView.set(bodyView: view)
+    bottomView.set(bodyView: view)
+    set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+    delegate?.didChangeBottomHeight(height: view.intrinsicContentSize.height)
+
   }
 
   public func dismiss(types: [ItemType], animated: Bool) {
 
     if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
+      delegate?.didChangeTopHeight(height: 0)
     }
-    else if types.contains(.middle) {
+    if types.contains(.middle) {
       set(constraint: middleViewHeight, value: 0, animated: animated)
+      delegate?.didChangeMiddleHeight(height: 0)
     }
-    else if types.contains(.bottom) {
+    if types.contains(.bottom) {
       set(constraint: bottomViewHeight, value: 0, animated: animated)
+      delegate?.didChangeBottomHeight(height: 0)
     }
 
   }

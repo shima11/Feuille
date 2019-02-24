@@ -46,6 +46,7 @@ class ViewController: UIViewController {
         chatButton.addTarget(self, action: #selector(didTapChatButton), for: .touchUpInside)
 
         feuilleView.set(middleView: customTextView, animated: true)
+        feuilleView.delegate = self
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
@@ -94,8 +95,8 @@ class ViewController: UIViewController {
 
     @objc func didTapView() {
 
-        _ = customTextView.resignFirstResponder()
-        feuilleView.dismiss(types: [.top, .middle, .bottom], animated: true)
+        _ = customTextView.endEditing(true)
+        feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
 
     @objc func didTapChatButton() {
@@ -104,6 +105,21 @@ class ViewController: UIViewController {
 
     }
 
+}
+
+extension ViewController: FeuilleViewDelegate {
+
+    func didChangeTopHeight(height: CGFloat) {
+        print("top height:", height)
+    }
+
+    func didChangeMiddleHeight(height: CGFloat) {
+        print("middle height:", height)
+    }
+
+    func didChangeBottomHeight(height: CGFloat) {
+        print("bottom height:", height)
+    }
 }
 
 
