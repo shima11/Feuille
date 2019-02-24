@@ -10,18 +10,22 @@ import Foundation
 
 public class FeuilleView: TouchThroughView {
 
+  public enum ItemType {
+    case top, middle, bottom
+  }
+
   // MARK: - Properties
 
   public let topView = ContentView()
   public let middleView = ContentView()
   public let bottomView = ContentView()
 
-  private let keyboardLayoutGuide: UILayoutGuide = .init()
-  private var keyboardHeight: NSLayoutConstraint!
-
+  private var topViewHeight: NSLayoutConstraint!
+  private var middleViewHeight: NSLayoutConstraint!
   private var bottomViewHeight: NSLayoutConstraint!
 
-  private var topViewHeight: NSLayoutConstraint!
+  private let keyboardLayoutGuide: UILayoutGuide = .init()
+  private var keyboardHeight: NSLayoutConstraint!
 
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
   private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
@@ -59,8 +63,6 @@ public class FeuilleView: TouchThroughView {
       topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
       topViewHeight.isActive = true
 
-      #warning("Think about a top constraint")
-
       NSLayoutConstraint.activate([
         topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
@@ -74,12 +76,16 @@ public class FeuilleView: TouchThroughView {
 
       middleView.translatesAutoresizingMaskIntoConstraints = false
 
+      middleViewHeight = middleView.heightAnchor.constraint(equalToConstant: 0)
+      middleViewHeight.isActive = true
+
       bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
       bottomMiddleToKeyboardConstraint.priority = .defaultLow
       bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
       bottomMiddleToBottomConstraint.priority = .defaultLow
 
       if #available(iOS 11.0, *) {
+
         NSLayoutConstraint.activate([
           middleView.rightAnchor.constraint(equalTo: rightAnchor),
           middleView.leftAnchor.constraint(equalTo: leftAnchor),
@@ -89,8 +95,19 @@ public class FeuilleView: TouchThroughView {
           middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
           middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
           ])
+
       } else {
-        // Fallback on earlier versions
+
+        NSLayoutConstraint.activate([
+          middleView.rightAnchor.constraint(equalTo: rightAnchor),
+          middleView.leftAnchor.constraint(equalTo: leftAnchor),
+          bottomMiddleToKeyboardConstraint,
+          bottomMiddleToBottomConstraint,
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
+          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
+          ])
+
       }
 
     }
@@ -103,14 +120,21 @@ public class FeuilleView: TouchThroughView {
       bottomViewHeight.isActive = true
 
       if #available(iOS 11.0, *) {
+
         NSLayoutConstraint.activate([
           bottomView.rightAnchor.constraint(equalTo: rightAnchor),
-
           bottomView.leftAnchor.constraint(equalTo: leftAnchor),
           bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
           ])
+
       } else {
-        // Fallback on earlier versions
+
+        NSLayoutConstraint.activate([
+          bottomView.rightAnchor.constraint(equalTo: rightAnchor),
+          bottomView.leftAnchor.constraint(equalTo: leftAnchor),
+          bottomView.bottomAnchor.constraint(equalTo: bottomAnchor),
+          ])
+
       }
 
     }
@@ -132,11 +156,7 @@ public class FeuilleView: TouchThroughView {
 
   public func set(bottomView view: UIView, animated: Bool) {
 
-    #warning("Think about a way to decide the bottomViewHeight.")
-
     bottomView.set(bodyView: view)
-
-    set(constraint: topViewHeight, value: 0, animated: animated)
 
     set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
   }
@@ -144,23 +164,29 @@ public class FeuilleView: TouchThroughView {
   public func set(middleView view: UIView, animated: Bool) {
 
     middleView.set(bodyView: view)
+    set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    set(constraint: topViewHeight, value: 0, animated: animated)
   }
 
   public func set(topView view: UIView, animated: Bool) {
 
-    #warning("Think about a way to decide the topViewHeight.")
-
-    topView.set(bodyView: view)    
+    topView.set(bodyView: view)
 
     set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
   }
 
-  public func dismiss(animated: Bool) {
+  public func dismiss(types: [ItemType], animated: Bool) {
 
-    set(constraint: topViewHeight, value: 0, animated: animated)
-    set(constraint: bottomViewHeight, value: 0, animated: animated)
+    if types.contains(.top) {
+      set(constraint: topViewHeight, value: 0, animated: animated)
+    }
+    else if types.contains(.middle) {
+      set(constraint: middleViewHeight, value: 0, animated: animated)
+    }
+    else if types.contains(.bottom) {
+      set(constraint: bottomViewHeight, value: 0, animated: animated)
+    }
+
   }
 
 
@@ -207,6 +233,8 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillChangeFrame(_ note: Notification) {
 
+    #warning("scroll中のkeyobard dismissの対応、これだけだとドラッグ中のキーボードの高さの変化に追従できない")
+
     var keyboardHeight: CGFloat? {
       guard let v = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
         return nil
@@ -230,9 +258,8 @@ public class FeuilleView: TouchThroughView {
       return UIView.AnimationCurve.easeInOut.rawValue
     }
 
-    print("height:", keyboardHeight)
-
     if let height = keyboardHeight, height > 0 {
+        // keyboardが開くときはbottomViewを閉じる
       bottomViewHeight.constant = 0
     }
 
@@ -245,4 +272,5 @@ public class FeuilleView: TouchThroughView {
     )
 
   }
+
 }

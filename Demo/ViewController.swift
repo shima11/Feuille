@@ -23,24 +23,28 @@ class ViewController: UIViewController {
     let photosView = PhotosView()
     let stanpView = StanpView()
 
+    let chatButton = UIButton(type: .system)
+
+    let scrollView = UIScrollView()
+
     var height: NSLayoutConstraint!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-
-        let button = UIButton(type: .system)
-        button.frame = .init(x: 0, y: 0, width: 80, height: 44)
-        button.center = view.center
-        button.setTitle("Chat", for: .normal)
-        button.setContentHuggingPriority(.required, for: .horizontal)
-        button.addTarget(self, action: #selector(didTapChatButton), for: .touchUpInside)
-
-        view.addSubview(button)
+        view.addSubview(scrollView)
         view.addSubview(feuilleView)
 
-        feuilleView.frame = view.bounds
-        feuilleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        scrollView.addSubview(chatButton)
+
+        scrollView.contentSize = .init(width: UIScreen.main.bounds.width, height: 1000)
+        scrollView.keyboardDismissMode = .interactive
+
+        chatButton.frame = .init(x: 0, y: 0, width: 80, height: 44)
+        chatButton.setTitle("Chat", for: .normal)
+        chatButton.setContentHuggingPriority(.required, for: .horizontal)
+        chatButton.addTarget(self, action: #selector(didTapChatButton), for: .touchUpInside)
+
         feuilleView.set(middleView: customTextView, animated: true)
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
@@ -52,6 +56,20 @@ class ViewController: UIViewController {
 
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
         view.addGestureRecognizer(gesture)
+
+
+        feuilleView.easy.layout(Edges())
+
+        scrollView.easy.layout(
+            Top(),
+            Left(),
+            Right(),
+            Bottom().to(feuilleView.middleView, .top)
+        )
+
+        chatButton.easy.layout(
+            Center()
+        )
 
     }
 
@@ -77,7 +95,7 @@ class ViewController: UIViewController {
     @objc func didTapView() {
 
         _ = customTextView.resignFirstResponder()
-        feuilleView.dismiss(animated: true)
+        feuilleView.dismiss(types: [.top, .middle, .bottom], animated: true)
     }
 
     @objc func didTapChatButton() {
@@ -145,6 +163,10 @@ class StanpView: UIView {
 
 class CustomInputView: UIView {
 
+    override var intrinsicContentSize: CGSize {
+        return .init(width: UIView.noIntrinsicMetric, height: 44)
+    }
+
     public let photoButton = UIButton(type: .system)
     public let previewButton = UIButton(type: .system)
     public let stanpButton = UIButton(type: .system)
@@ -183,25 +205,24 @@ class CustomInputView: UIView {
         stanpButton.setContentHuggingPriority(.required, for: .horizontal)
 
         photoButton.easy.layout(
-            Top(16),
             Left(16),
-            Bottom(16)
+            CenterY()
         )
 
         previewButton.easy.layout(
             Left(16).to(photoButton, .right),
-            CenterY().to(photoButton)
+            CenterY()
         )
 
         stanpButton.easy.layout(
             Left(16).to(previewButton, .right),
-            CenterY().to(photoButton)
+            CenterY()
         )
 
         textView.easy.layout(
             Left(16).to(stanpButton, .right),
-            CenterY().to(photoButton),
-            Right(16)
+            Right(16),
+            CenterY()
         )
     }
 
