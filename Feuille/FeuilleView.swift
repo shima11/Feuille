@@ -41,6 +41,9 @@ public class FeuilleView: TouchThroughView {
 
   private let panRecognizer = UIPanGestureRecognizer()
 
+  private var bottomViewBottomConstraint: NSLayoutConstraint!
+
+
   private var keyboardFrame: CGRect {
     didSet {
       print("keyboard farme:", keyboardFrame)
@@ -154,18 +157,22 @@ public class FeuilleView: TouchThroughView {
 
       if #available(iOS 11.0, *) {
 
+        bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+
         NSLayoutConstraint.activate([
           bottomView.rightAnchor.constraint(equalTo: rightAnchor),
           bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+          bottomViewBottomConstraint
           ])
 
       } else {
 
+        bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: bottomAnchor)
+
         NSLayoutConstraint.activate([
           bottomView.rightAnchor.constraint(equalTo: rightAnchor),
           bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomView.bottomAnchor.constraint(equalTo: bottomAnchor),
+          bottomViewBottomConstraint
           ])
 
       }
@@ -212,6 +219,7 @@ public class FeuilleView: TouchThroughView {
 
     bottomView.set(bodyView: view)
     set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+    set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
@@ -227,9 +235,11 @@ public class FeuilleView: TouchThroughView {
     }
     if types.contains(.bottom) {
       set(constraint: bottomViewHeight, value: 0, animated: animated)
+      set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
     }
-    
-    delegate?.didChangeHeight(height: 0)
+
+    #warning("topviewをheightに含むかどうかを入れないといけない")
+    delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height)
 
   }
 
@@ -306,32 +316,12 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillChangeFrame(_ note: Notification) {
 
-    #warning("scroll中のkeyobard dismissの対応、これだけだとドラッグ中のキーボードの高さの変化に追従できない")
+    let result = calcurateKeyboardContext(note: note)
 
-    var newFrame: CGRect {
-      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
-      return rectValue?.cgRectValue ?? defaultFrame
-    }
-
-    keyboardFrame = newFrame
-
-    var animationDuration: Double {
-      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
-        return number.doubleValue
-      } else {
-        return 0.25
-      }
-    }
-
-    var animationCurve: Int {
-      if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
-        return number.intValue
-      }
-      return UIView.AnimationCurve.easeInOut.rawValue
-    }
+    keyboardFrame = result.frame
 
     if keyboardFrame.height > 0 {
-        // keyboardが開くときはbottomViewを閉じる
+      // keyboardが開くときはbottomViewを閉じる
       set(constraint: bottomViewHeight, value: 0, animated: true)
     }
 
@@ -339,8 +329,8 @@ public class FeuilleView: TouchThroughView {
       constraint: self.keyboardHeight,
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
-      animationDuration: animationDuration,
-      animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
+      animationDuration: result.duration,
+      animationOptions: result.curve
     )
 
   }
@@ -348,14 +338,26 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillHideFrame(_ note: Notification) {
 
-    #warning("keyboardWillChangeFrameと処理を共通化したい")
+    let result = calcurateKeyboardContext(note: note)
+
+    keyboardFrame = result.frame
+
+    set(
+      constraint: self.keyboardHeight,
+      value: UIScreen.main.bounds.height - keyboardFrame.minY,
+      animated: true,
+      animationDuration: result.duration,
+      animationOptions: result.curve
+    )
+
+  }
+
+  private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
 
     var newFrame: CGRect {
       let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
       return rectValue?.cgRectValue ?? defaultFrame
     }
-
-    keyboardFrame = newFrame
 
     var animationDuration: Double {
       if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
@@ -372,30 +374,72 @@ public class FeuilleView: TouchThroughView {
       return UIView.AnimationCurve.easeInOut.rawValue
     }
 
-    set(
-      constraint: self.keyboardHeight,
-      value: UIScreen.main.bounds.height - keyboardFrame.minY,
-      animated: true,
-      animationDuration: animationDuration,
-      animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
-    )
-
+    return (newFrame, animationDuration, UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)))
   }
 
   @objc
   private func panGesture(_ recognizer: UIPanGestureRecognizer) {
 
-    guard
-      case .changed = recognizer.state,
-      let window = UIApplication.shared.windows.first,
-      keyboardFrame.origin.y < UIScreen.main.bounds.height
-      else { return }
+    if bottomViewHeight.constant > 0 {
 
-    let origin = recognizer.location(in: window)
-    var newFrame = keyboardFrame
-    newFrame.origin.y = max(origin.y, UIScreen.main.bounds.height - keyboardFrame.height)
+      // BottomViewが表示されている場合
 
-    keyboardFrame = newFrame
+      switch recognizer.state {
+      case .changed:
+
+        let scrollingTouchPoint = recognizer.location(ofTouch: 0, in: recognizer.view)
+
+        #warning("たぶん計算間違えてる気がする")
+        let threthold = bounds.height - bottomView.intrinsicContentSize.height - middleView.intrinsicContentSize.height
+
+        if threthold < scrollingTouchPoint.y {
+
+          let length = scrollingTouchPoint.y - threthold
+
+          if length > 0 {
+            set(constraint: bottomViewBottomConstraint, value: length, animated: false)
+            #warning("概念としておかしい")
+            delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height - length)
+          }
+        }
+
+      case .ended, .cancelled, .failed:
+
+        #warning("適当なしきい値")
+        if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.6 {
+          #warning("scrollのvelocityも考慮してanimationする")
+          set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
+          set(constraint: bottomViewHeight, value: 0, animated: true)
+          #warning("topviewをheightに含むかどうかを入れないといけない")
+          delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height)
+        } else {
+          set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
+          set(constraint: bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
+          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
+        }
+
+      default:
+        break
+      }
+
+    } else {
+
+      // BottomViewが表示されていない or キーボードが表示されている
+
+      guard
+        case .changed = recognizer.state,
+        let window = UIApplication.shared.windows.first,
+        keyboardFrame.origin.y < UIScreen.main.bounds.height
+        else { return }
+
+      let origin = recognizer.location(in: window)
+      var newFrame = keyboardFrame
+      newFrame.origin.y = max(origin.y, UIScreen.main.bounds.height - keyboardFrame.height)
+
+      keyboardFrame = newFrame
+
+      set(constraint: keyboardHeight, value: UIScreen.main.bounds.height - keyboardFrame.minY, animated: false)
+    }
   }
 
 }

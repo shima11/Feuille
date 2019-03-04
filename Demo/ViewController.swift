@@ -27,6 +27,8 @@ class ViewController: UIViewController {
 
     var height: NSLayoutConstraint!
 
+    private let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -57,7 +59,21 @@ class ViewController: UIViewController {
 
         feuilleView.easy.layout(Edges())
 
-        collectionView.easy.layout(Edges())
+        if #available(iOS 11.0, *) {
+            collectionView.easy.layout(
+                Top(),
+                Left(),
+                Bottom().to(view.safeAreaLayoutGuide, .bottom),
+                Right()
+            )
+        } else {
+            collectionView.easy.layout(
+                Top(),
+                Left(),
+                Bottom().to(bottomLayoutGuide, .top),
+                Right()
+            )
+        }
 
     }
 
@@ -129,7 +145,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        return insets
     }
 }
 
@@ -141,9 +157,19 @@ extension ViewController: FeuilleViewDelegate {
         print("height:", height)
 
 //        if collectionView.contentOffset.y >= collectionView.contentSize.height - collectionView.bounds.height {
-//            collectionView.setContentOffset(.init(x: collectionView.contentOffset.x, y: height), animated: true)
-            collectionView.contentInset = .init(top: collectionView.contentInset.top, left: collectionView.contentInset.left, bottom: collectionView.contentInset.bottom + height, right: collectionView.contentInset.right)
-            collectionView.scrollIndicatorInsets = .init(top: collectionView.scrollIndicatorInsets.top, left: collectionView.scrollIndicatorInsets.left, bottom: collectionView.scrollIndicatorInsets.bottom + height, right: collectionView.scrollIndicatorInsets.right)
+        //            collectionView.setContentOffset(.init(x: collectionView.contentOffset.x, y: height), animated: true)
+        collectionView.contentInset = .init(
+            top: collectionView.contentInset.top,
+            left: collectionView.contentInset.left,
+            bottom: height + insets.bottom,
+            right: collectionView.contentInset.right
+        )
+        collectionView.scrollIndicatorInsets = .init(
+            top: collectionView.scrollIndicatorInsets.top,
+            left: collectionView.scrollIndicatorInsets.left,
+            bottom: height + insets.bottom,
+            right: collectionView.scrollIndicatorInsets.right
+        )
 //        }
     }
 
