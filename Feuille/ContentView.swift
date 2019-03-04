@@ -10,6 +10,10 @@ import Foundation
 
 public class ContentView: UIView {
 
+    public override var intrinsicContentSize: CGSize {
+        return bodyView?.intrinsicContentSize ?? .init(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+    }
+
     private weak var bodyView: UIView? = nil
 
     func set(bodyView: UIView) {
@@ -19,6 +23,8 @@ public class ContentView: UIView {
         self.bodyView = bodyView
 
         bodyView.translatesAutoresizingMaskIntoConstraints = false
+
+        // auto sizing mask と nslayoutconstraint の違い
 
         NSLayoutConstraint.activate([
             bodyView.topAnchor.constraint(equalTo: topAnchor),
@@ -31,5 +37,9 @@ public class ContentView: UIView {
 
     }
 
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        print("content view frame", frame)
+    }
 
 }

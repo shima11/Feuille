@@ -61,12 +61,7 @@ class ViewController: UIViewController {
 
         feuilleView.easy.layout(Edges())
 
-        scrollView.easy.layout(
-            Top(),
-            Left(),
-            Right(),
-            Bottom().to(feuilleView.middleView, .top)
-        )
+        scrollView.easy.layout(Edges())
 
         chatButton.easy.layout(
             Center()
@@ -109,21 +104,24 @@ class ViewController: UIViewController {
 
 extension ViewController: FeuilleViewDelegate {
 
-    func didChangeTopHeight(height: CGFloat) {
-        print("top height:", height)
+    func didChangeHeight(height: CGFloat) {
+
+        print("height:", height)
+
+        // LINE形式
+        if scrollView.contentOffset.y >= scrollView.contentSize.height - scrollView.bounds.height {
+            scrollView.setContentOffset(.init(x: scrollView.contentOffset.x, y: height), animated: true)
+        }
     }
 
-    func didChangeMiddleHeight(height: CGFloat) {
-        print("middle height:", height)
-    }
-
-    func didChangeBottomHeight(height: CGFloat) {
-        print("bottom height:", height)
-    }
 }
 
 
 class CustomTopView: UIView {
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: UIView.noIntrinsicMetric, height: 200)
+    }
 
     init() {
 

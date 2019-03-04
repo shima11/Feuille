@@ -10,10 +10,7 @@ import Foundation
 
 public protocol FeuilleViewDelegate: class {
 
-  func didChangeTopHeight(height: CGFloat)
-  func didChangeMiddleHeight(height: CGFloat)
-  func didChangeBottomHeight(height: CGFloat)
-
+  func didChangeHeight(height: CGFloat)
 }
 
 public class FeuilleView: TouchThroughView {
@@ -166,11 +163,14 @@ public class FeuilleView: TouchThroughView {
 
   public func set(topView view: UIView, animated: Bool) {
 
+    #warning("topViewをdelegateで返すheightに含むかのパラメータ検討")
+
     topView.set(bodyView: view)
 
     set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    delegate?.didChangeTopHeight(height: view.intrinsicContentSize.height)
+    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+    delegate?.didChangeHeight(height: height)
 
   }
 
@@ -179,7 +179,8 @@ public class FeuilleView: TouchThroughView {
     middleView.set(bodyView: view)
     set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    delegate?.didChangeMiddleHeight(height: view.intrinsicContentSize.height)
+    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+    delegate?.didChangeHeight(height: height)
 
   }
 
@@ -188,7 +189,8 @@ public class FeuilleView: TouchThroughView {
     bottomView.set(bodyView: view)
     set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    delegate?.didChangeBottomHeight(height: view.intrinsicContentSize.height)
+    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+    delegate?.didChangeHeight(height: height)
 
   }
 
@@ -196,16 +198,15 @@ public class FeuilleView: TouchThroughView {
 
     if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
-      delegate?.didChangeTopHeight(height: 0)
     }
     if types.contains(.middle) {
       set(constraint: middleViewHeight, value: 0, animated: animated)
-      delegate?.didChangeMiddleHeight(height: 0)
     }
     if types.contains(.bottom) {
       set(constraint: bottomViewHeight, value: 0, animated: animated)
-      delegate?.didChangeBottomHeight(height: 0)
     }
+    
+    delegate?.didChangeHeight(height: 0)
 
   }
 
