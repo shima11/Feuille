@@ -25,6 +25,8 @@ public class FeuilleView: TouchThroughView {
   public let middleView = ContentView()
   public let bottomView = ContentView()
 
+  public weak var delegate: FeuilleViewDelegate?
+
   private var topViewHeight: NSLayoutConstraint!
   private var middleViewHeight: NSLayoutConstraint!
   private var bottomViewHeight: NSLayoutConstraint!
@@ -35,7 +37,8 @@ public class FeuilleView: TouchThroughView {
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
   private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
 
-  public weak var delegate: FeuilleViewDelegate?
+  private var isIncludedTopViewHeight: Bool = true
+
 
   // MARK: - Initializers
 
@@ -161,16 +164,15 @@ public class FeuilleView: TouchThroughView {
 
   // MARK: - Functions
 
-  public func set(topView view: UIView, animated: Bool) {
+  public func set(topView view: UIView, animated: Bool, isIncludedTopViewHeight: Bool) {
 
-    #warning("topViewをdelegateで返すheightに含むかのパラメータ検討")
+    self.isIncludedTopViewHeight = isIncludedTopViewHeight
 
     topView.set(bodyView: view)
 
     set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
-    delegate?.didChangeHeight(height: height)
+    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
   }
 
@@ -179,8 +181,7 @@ public class FeuilleView: TouchThroughView {
     middleView.set(bodyView: view)
     set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
-    delegate?.didChangeHeight(height: height)
+    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
   }
 
@@ -189,8 +190,7 @@ public class FeuilleView: TouchThroughView {
     bottomView.set(bodyView: view)
     set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    let height = topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
-    delegate?.didChangeHeight(height: height)
+    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
   }
 
@@ -210,6 +210,13 @@ public class FeuilleView: TouchThroughView {
 
   }
 
+  private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
+
+    if isIncludedTopViewHeight {
+      return topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+    }
+    return middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+  }
 
   private func set(
     constraint: NSLayoutConstraint,
