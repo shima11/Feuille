@@ -23,30 +23,27 @@ class ViewController: UIViewController {
     let photosView = PhotosView()
     let stanpView = StanpView()
 
-    let chatButton = UIButton(type: .system)
-
-    let scrollView = UIScrollView()
+    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     var height: NSLayoutConstraint!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.addSubview(scrollView)
+        view.addSubview(collectionView)
         view.addSubview(feuilleView)
 
-        scrollView.addSubview(chatButton)
+        collectionView.contentSize = .init(width: UIScreen.main.bounds.width, height: 1000)
 
-        scrollView.contentSize = .init(width: UIScreen.main.bounds.width, height: 1000)
-        scrollView.keyboardDismissMode = .interactive
+        collectionView.delegate = self
+        collectionView.dataSource = self
 
-        chatButton.frame = .init(x: 0, y: 0, width: 80, height: 44)
-        chatButton.setTitle("Chat", for: .normal)
-        chatButton.setContentHuggingPriority(.required, for: .horizontal)
-        chatButton.addTarget(self, action: #selector(didTapChatButton), for: .touchUpInside)
+        collectionView.backgroundColor = .white
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.keyboardDismissMode = .interactive
 
-        feuilleView.set(middleView: customTextView, animated: true)
         feuilleView.delegate = self
+        feuilleView.set(middleView: customTextView, animated: true)
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
@@ -58,14 +55,9 @@ class ViewController: UIViewController {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
         view.addGestureRecognizer(gesture)
 
-
         feuilleView.easy.layout(Edges())
 
-        scrollView.easy.layout(Edges())
-
-        chatButton.easy.layout(
-            Center()
-        )
+        collectionView.easy.layout(Edges())
 
     }
 
@@ -94,13 +86,53 @@ class ViewController: UIViewController {
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
 
-    @objc func didTapChatButton() {
+}
 
-        _ = customTextView.becomeFirstResponder()
+extension ViewController: UICollectionViewDataSource {
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+
+        let inputView = UIView()
+        inputView.backgroundColor = UIColor.groupTableViewBackground
+        inputView.layer.cornerRadius = 8
+        inputView.clipsToBounds = true
+        cell.addSubview(inputView)
+        inputView.easy.layout(Edges(8))
+
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 20
+    }
+
+}
+
+extension ViewController: UICollectionViewDelegate {
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
     }
 
 }
+
+extension ViewController: UICollectionViewDelegateFlowLayout {
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 60)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+    }
+}
+
 
 extension ViewController: FeuilleViewDelegate {
 
@@ -108,10 +140,11 @@ extension ViewController: FeuilleViewDelegate {
 
         print("height:", height)
 
-        // LINE形式
-        if scrollView.contentOffset.y >= scrollView.contentSize.height - scrollView.bounds.height {
-            scrollView.setContentOffset(.init(x: scrollView.contentOffset.x, y: height), animated: true)
-        }
+//        if collectionView.contentOffset.y >= collectionView.contentSize.height - collectionView.bounds.height {
+//            collectionView.setContentOffset(.init(x: collectionView.contentOffset.x, y: height), animated: true)
+            collectionView.contentInset = .init(top: collectionView.contentInset.top, left: collectionView.contentInset.left, bottom: collectionView.contentInset.bottom + height, right: collectionView.contentInset.right)
+            collectionView.scrollIndicatorInsets = .init(top: collectionView.scrollIndicatorInsets.top, left: collectionView.scrollIndicatorInsets.left, bottom: collectionView.scrollIndicatorInsets.bottom + height, right: collectionView.scrollIndicatorInsets.right)
+//        }
     }
 
 }
