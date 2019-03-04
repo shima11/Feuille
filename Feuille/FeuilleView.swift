@@ -39,12 +39,35 @@ public class FeuilleView: TouchThroughView {
 
   private var isIncludedTopViewHeight: Bool = true
 
+  private let panRecognizer = UIPanGestureRecognizer()
+
+  private var keyboardFrame: CGRect {
+    didSet {
+      print("keyboard farme:", keyboardFrame)
+    }
+  }
+
+  private let defaultFrame: CGRect
+
 
   // MARK: - Initializers
 
   public init() {
 
+
+    defaultFrame = CGRect(
+      x: 0,
+      y: UIScreen.main.bounds.height,
+      width: UIScreen.main.bounds.width,
+      height: 0
+    )
+
+    keyboardFrame = defaultFrame
+
     super.init(frame: .zero)
+
+    panRecognizer.delegate = self
+    panRecognizer.addTarget(self, action: #selector(panGesture(_:)))
 
     keyboardLayout: do {
 
@@ -210,6 +233,8 @@ public class FeuilleView: TouchThroughView {
 
   }
 
+  #warning("標準のkeyboardのHeightも含めてFeuilleの管理しているKeyboardのトータルのHeightを返すプロパティがほしい")
+
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
 
     if isIncludedTopViewHeight {
@@ -256,6 +281,26 @@ public class FeuilleView: TouchThroughView {
       object: nil
     )
 
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillHideFrame(_:)),
+      name: UIResponder.keyboardWillHideNotification,
+      object: nil
+    )
+
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationDidFinishLaunching(_:)),
+      name: UIApplication.didFinishLaunchingNotification,
+      object: nil
+    )
+
+  }
+
+  @objc
+  private func applicationDidFinishLaunching(_ note: Notification) {
+
+    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
   }
 
   @objc
@@ -263,13 +308,12 @@ public class FeuilleView: TouchThroughView {
 
     #warning("scroll中のkeyobard dismissの対応、これだけだとドラッグ中のキーボードの高さの変化に追従できない")
 
-    var keyboardHeight: CGFloat? {
-      guard let v = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
-        return nil
-      }
-      let screenHeight = UIScreen.main.bounds.height
-      return screenHeight - v.cgRectValue.minY
+    var newFrame: CGRect {
+      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+      return rectValue?.cgRectValue ?? defaultFrame
     }
+
+    keyboardFrame = newFrame
 
     var animationDuration: Double {
       if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
@@ -286,19 +330,105 @@ public class FeuilleView: TouchThroughView {
       return UIView.AnimationCurve.easeInOut.rawValue
     }
 
-    if let height = keyboardHeight, height > 0 {
+    if keyboardFrame.height > 0 {
         // keyboardが開くときはbottomViewを閉じる
-      bottomViewHeight.constant = 0
+      set(constraint: bottomViewHeight, value: 0, animated: true)
     }
 
     set(
       constraint: self.keyboardHeight,
-      value: keyboardHeight!,
+      value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: animationDuration,
       animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
     )
 
+  }
+
+  @objc
+  private func keyboardWillHideFrame(_ note: Notification) {
+
+    #warning("keyboardWillChangeFrameと処理を共通化したい")
+
+    var newFrame: CGRect {
+      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+      return rectValue?.cgRectValue ?? defaultFrame
+    }
+
+    keyboardFrame = newFrame
+
+    var animationDuration: Double {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
+        return number.doubleValue
+      } else {
+        return 0.25
+      }
+    }
+
+    var animationCurve: Int {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
+        return number.intValue
+      }
+      return UIView.AnimationCurve.easeInOut.rawValue
+    }
+
+    set(
+      constraint: self.keyboardHeight,
+      value: UIScreen.main.bounds.height - keyboardFrame.minY,
+      animated: true,
+      animationDuration: animationDuration,
+      animationOptions: UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
+    )
+
+  }
+
+  @objc
+  private func panGesture(_ recognizer: UIPanGestureRecognizer) {
+
+    guard
+      case .changed = recognizer.state,
+      let window = UIApplication.shared.windows.first,
+      keyboardFrame.origin.y < UIScreen.main.bounds.height
+      else { return }
+
+    let origin = recognizer.location(in: window)
+    var newFrame = keyboardFrame
+    newFrame.origin.y = max(origin.y, UIScreen.main.bounds.height - keyboardFrame.height)
+
+    keyboardFrame = newFrame
+  }
+
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension FeuilleView: UIGestureRecognizerDelegate {
+
+  public func gestureRecognizer(
+    _ gestureRecognizer: UIGestureRecognizer,
+    shouldReceive touch: UITouch
+    ) -> Bool {
+
+    let point = touch.location(in: gestureRecognizer.view)
+    var view = gestureRecognizer.view?.hitTest(point, with: nil)
+
+    while let candidate = view {
+      if let scrollView = candidate as? UIScrollView,
+        case .interactive = scrollView.keyboardDismissMode {
+        return true
+      }
+      view = candidate.superview
+    }
+
+    return false
+  }
+
+  public func gestureRecognizer(
+    _ gestureRecognizer: UIGestureRecognizer,
+    shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+
+    return gestureRecognizer === self.panRecognizer
   }
 
 }
