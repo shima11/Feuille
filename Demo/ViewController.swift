@@ -156,8 +156,6 @@ extension ViewController: FeuilleViewDelegate {
 
         print("height:", height)
 
-//        if collectionView.contentOffset.y >= collectionView.contentSize.height - collectionView.bounds.height {
-        //            collectionView.setContentOffset(.init(x: collectionView.contentOffset.x, y: height), animated: true)
         collectionView.contentInset = .init(
             top: collectionView.contentInset.top,
             left: collectionView.contentInset.left,
@@ -170,7 +168,7 @@ extension ViewController: FeuilleViewDelegate {
             bottom: height + insets.bottom,
             right: collectionView.scrollIndicatorInsets.right
         )
-//        }
+
     }
 
 }

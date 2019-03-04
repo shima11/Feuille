@@ -10,6 +10,7 @@ import Foundation
 
 public protocol FeuilleViewDelegate: class {
 
+  // height of keyboard or bottomview
   func didChangeHeight(height: CGFloat)
 }
 
@@ -243,8 +244,6 @@ public class FeuilleView: TouchThroughView {
 
   }
 
-  #warning("標準のkeyboardのHeightも含めてFeuilleの管理しているKeyboardのトータルのHeightを返すプロパティがほしい")
-
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
 
     if isIncludedTopViewHeight {
@@ -333,6 +332,7 @@ public class FeuilleView: TouchThroughView {
       animationOptions: result.curve
     )
 
+    delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY)
   }
 
   @objc
@@ -350,6 +350,7 @@ public class FeuilleView: TouchThroughView {
       animationOptions: result.curve
     )
 
+    delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY + middleView.intrinsicContentSize.height)
   }
 
   private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
@@ -399,7 +400,7 @@ public class FeuilleView: TouchThroughView {
           if length > 0 {
             set(constraint: bottomViewBottomConstraint, value: length, animated: false)
             #warning("概念としておかしい")
-            delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height - length)
+            delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height - length + middleView.intrinsicContentSize.height)
           }
         }
 
@@ -439,6 +440,9 @@ public class FeuilleView: TouchThroughView {
       keyboardFrame = newFrame
 
       set(constraint: keyboardHeight, value: UIScreen.main.bounds.height - keyboardFrame.minY, animated: false)
+
+      delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY)
+
     }
   }
 
