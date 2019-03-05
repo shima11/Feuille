@@ -97,6 +97,7 @@ public class FeuilleView: TouchThroughView {
       topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
       topViewHeight.isActive = true
 
+      #warning("適当なしきい値")
       NSLayoutConstraint.activate([
         topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
@@ -329,19 +330,29 @@ public class FeuilleView: TouchThroughView {
       }
       .first
 
-    guard let window = keyboardWindow else { return }
+//    guard let window = keyboardWindow else { return }
 
-    window.layer.speed = 0
+//    window.layer.speed = 0
+
+//    window.layer.timeOffset = 0.25
 //    window.layer.removeAllAnimations()
 //    UIView.performWithoutAnimation {
 //      keyboardWindow?.frame = .init(x: 0, y: 0, width: window.frame.width, height: window.frame.height)
 //    }
+//    window.layer.speed = 1
+
+//    window.layer.animationKeys()
+
 
   }
 
   @objc
   private func keyboardDidShowNotification(_ note: Notification) {
 
+//    guard let window = keyboardWindow else { return }
+//    window.layer.speed = 1
+
+    keyboardWindow = nil
   }
 
   @objc
@@ -479,8 +490,6 @@ public class FeuilleView: TouchThroughView {
       keyboardFrame = newFrame
 
       let _keyboardHeight = UIScreen.main.bounds.height - keyboardFrame.minY
-
-//      print("origin:", origin, "keyboard frame:", keyboardFrame, "screen:", UIScreen.main.bounds)
 
       set(constraint: keyboardHeight, value: _keyboardHeight, animated: false)
       delegate?.didChangeHeight(height: _keyboardHeight)
