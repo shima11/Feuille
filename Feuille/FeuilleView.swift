@@ -8,7 +8,7 @@
 
 import Foundation
 
-#warning("keyboardを表示している状態で、BottomViewの表示切り替え")
+#warning("keyboard ↔ bottomView switch animation")
 
 public protocol FeuilleViewDelegate: class {
 
@@ -198,6 +198,7 @@ public class FeuilleView: TouchThroughView {
   public func set(middleView view: UIView, animated: Bool) {
 
     middleView.set(bodyView: view)
+
     set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
@@ -207,6 +208,7 @@ public class FeuilleView: TouchThroughView {
   public func set(bottomView view: UIView, animated: Bool) {
 
     bottomView.set(bodyView: view)
+
     set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
     set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
 
