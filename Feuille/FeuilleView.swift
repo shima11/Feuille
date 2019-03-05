@@ -212,21 +212,20 @@ public class FeuilleView: TouchThroughView {
 
   }
 
-  public func dismiss(types: [ItemType], animated: Bool) {
+  public func dismiss(type: ItemType, animated: Bool) {
 
-    if types.contains(.top) {
+    switch type {
+    case .top:
       set(constraint: topViewHeight, value: 0, animated: animated)
-    }
-    if types.contains(.middle) {
+      delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height)
+    case .middle:
       set(constraint: middleViewHeight, value: 0, animated: animated)
-    }
-    if types.contains(.bottom) {
+      delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height)
+    case .bottom:
       set(constraint: bottomViewHeight, value: 0, animated: animated)
       set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
+      delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height)
     }
-
-    #warning("topviewをheightに含むかどうかを入れないといけない")
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
   }
 
@@ -381,7 +380,7 @@ public class FeuilleView: TouchThroughView {
 
         let origin = recognizer.location(in: window)
 
-        let threthold = bounds.height - bottomView.intrinsicContentSize.height - middleView.intrinsicContentSize.height
+        let threthold = bounds.height - bottomView.intrinsicContentSize.height // - middleView.intrinsicContentSize.height
 
         let length = origin.y - threthold
 

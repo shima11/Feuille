@@ -99,7 +99,8 @@ class ViewController: UIViewController {
     @objc func didTapView() {
 
         _ = customTextView.endEditing(true)
-        feuilleView.dismiss(types: [.top, .bottom], animated: true)
+        feuilleView.dismiss(type: .top, animated: true)
+        feuilleView.dismiss(type: .bottom, animated: true)
     }
 
 }
