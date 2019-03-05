@@ -8,7 +8,7 @@
 
 import Foundation
 
-#warning("keyboard ↔ bottomView switch animation")
+#warning("bottomView → keyboard animation")
 
 public protocol FeuilleViewDelegate: class {
 
@@ -30,50 +30,47 @@ public class FeuilleView: TouchThroughView {
 
   public weak var delegate: FeuilleViewDelegate?
 
+  private let keyboardLayoutGuide: UILayoutGuide = .init()
+  private var keyboardHeight: NSLayoutConstraint!
+
   private var topViewHeight: NSLayoutConstraint!
   private var middleViewHeight: NSLayoutConstraint!
   private var bottomViewHeight: NSLayoutConstraint!
 
-  private let keyboardLayoutGuide: UILayoutGuide = .init()
-  private var keyboardHeight: NSLayoutConstraint!
-
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
   private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
+  private var bottomViewBottomConstraint: NSLayoutConstraint!
 
   private var isIncludedTopViewHeight: Bool = true
 
   private let panRecognizer = UIPanGestureRecognizer()
 
-  private var bottomViewBottomConstraint: NSLayoutConstraint!
-
-
-  private var keyboardFrame: CGRect {
-    didSet {
-//      print("keyboard farme:", keyboardFrame)
-    }
-  }
-
-  private let defaultFrame: CGRect
-
+  private var keyboardFrame: CGRect
+  private let defaultKeyboardFrame: CGRect
 
   // MARK: - Initializers
 
   public init() {
 
-
-    defaultFrame = CGRect(
+    defaultKeyboardFrame = CGRect(
       x: 0,
       y: UIScreen.main.bounds.height,
       width: UIScreen.main.bounds.width,
       height: 0
     )
 
-    keyboardFrame = defaultFrame
+    keyboardFrame = defaultKeyboardFrame
 
     super.init(frame: .zero)
 
     panRecognizer.delegate = self
     panRecognizer.addTarget(self, action: #selector(panGesture(_:)))
+
+    addSubview(topView)
+    addSubview(middleView)
+    addSubview(bottomView)
+
+    startObserveKeyboard()
 
     keyboardLayout: do {
 
@@ -90,10 +87,6 @@ public class FeuilleView: TouchThroughView {
         ])
 
     }
-
-    addSubview(topView)
-    addSubview(middleView)
-    addSubview(bottomView)
 
     topView: do {
 
@@ -168,8 +161,6 @@ public class FeuilleView: TouchThroughView {
 
     }
 
-    startObserveKeyboard()
-
   }
 
 
@@ -209,8 +200,15 @@ public class FeuilleView: TouchThroughView {
 
     bottomView.set(bodyView: view)
 
-    set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
-    set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
+    if keyboardHeight.constant > 0 {
+      // keybaordがある場合はアニメーションなし
+      dismissKeyboard(animated: false, force: true)
+      set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: false)
+      set(constraint: bottomViewBottomConstraint, value: 0, animated: false)
+    } else {
+      set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+      set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
+    }
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
@@ -233,6 +231,18 @@ public class FeuilleView: TouchThroughView {
 
   }
 
+  public func dismissKeyboard(animated: Bool, force: Bool) {
+
+    if animated {
+      self.endEditing(force)
+    } else {
+      UIView.setAnimationsEnabled(false)
+      self.endEditing(force)
+      UIView.setAnimationsEnabled(true)
+    }
+  }
+
+
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
 
     if isIncludedTopViewHeight {
@@ -246,7 +256,7 @@ public class FeuilleView: TouchThroughView {
     value: CGFloat,
     animated: Bool,
     animationDuration: TimeInterval = 0.25,
-    animationOptions: UIView.AnimationOptions = .overrideInheritedCurve
+    animationOptions: UIView.AnimationOptions = [.beginFromCurrentState]
     ){
 
     if animated {
@@ -318,7 +328,7 @@ public class FeuilleView: TouchThroughView {
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: result.duration,
-      animationOptions: result.curve
+      animationOptions: [result.curve, .beginFromCurrentState]
     )
 
     delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY)
@@ -336,7 +346,7 @@ public class FeuilleView: TouchThroughView {
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: result.duration,
-      animationOptions: result.curve
+      animationOptions: [result.curve, .beginFromCurrentState]
     )
 
     delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY + middleView.intrinsicContentSize.height)
@@ -346,7 +356,7 @@ public class FeuilleView: TouchThroughView {
 
     var newFrame: CGRect {
       let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
-      return rectValue?.cgRectValue ?? defaultFrame
+      return rectValue?.cgRectValue ?? defaultKeyboardFrame
     }
 
     var animationDuration: Double {

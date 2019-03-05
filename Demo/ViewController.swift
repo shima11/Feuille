@@ -79,8 +79,6 @@ class ViewController: UIViewController {
 
     @objc func didTapPhotoButton() {
 
-        _ = customTextView.endEditing(true)
-
         feuilleView.set(bottomView: photosView, animated: true)
     }
 
@@ -91,14 +89,13 @@ class ViewController: UIViewController {
 
     @objc func didTapStanpButton() {
 
-        _ = customTextView.endEditing(true)
-
         feuilleView.set(bottomView: stanpView, animated: true)
     }
 
     @objc func didTapView() {
 
-        _ = customTextView.endEditing(true)
+        feuilleView.endEditing(true)
+
         feuilleView.dismiss(type: .top, animated: true)
         feuilleView.dismiss(type: .bottom, animated: true)
     }
