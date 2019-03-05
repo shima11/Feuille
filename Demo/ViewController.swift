@@ -134,6 +134,10 @@ extension ViewController: UICollectionViewDelegate {
 
     }
 
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+
+    }
+
 }
 
 extension ViewController: UICollectionViewDelegateFlowLayout {
@@ -151,8 +155,6 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 extension ViewController: FeuilleViewDelegate {
 
     func didChangeHeight(height: CGFloat) {
-
-//        print("height:", height)
 
         collectionView.contentInset = .init(
             top: collectionView.contentInset.top,

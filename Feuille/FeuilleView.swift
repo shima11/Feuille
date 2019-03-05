@@ -48,6 +48,8 @@ public class FeuilleView: TouchThroughView {
   private var keyboardFrame: CGRect
   private let defaultKeyboardFrame: CGRect
 
+  private var keyboardWindow: UIWindow? = nil
+
   // MARK: - Initializers
 
   public init() {
@@ -193,7 +195,6 @@ public class FeuilleView: TouchThroughView {
     set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
-
   }
 
   public func set(bottomView view: UIView, animated: Bool) {
@@ -242,7 +243,6 @@ public class FeuilleView: TouchThroughView {
     }
   }
 
-
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
 
     if isIncludedTopViewHeight {
@@ -284,6 +284,20 @@ public class FeuilleView: TouchThroughView {
 
     NotificationCenter.default.addObserver(
       self,
+      selector: #selector(keyboardWillShowNotification(_:)),
+      name: UIResponder.keyboardWillShowNotification,
+      object: nil
+    )
+
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardDidShowNotification(_:)),
+      name: UIResponder.keyboardDidShowNotification,
+      object: nil
+    )
+
+    NotificationCenter.default.addObserver(
+      self,
       selector: #selector(keyboardWillChangeFrame(_:)),
       name: UIResponder.keyboardWillChangeFrameNotification,
       object: nil
@@ -306,6 +320,31 @@ public class FeuilleView: TouchThroughView {
   }
 
   @objc
+  private func keyboardWillShowNotification(_ note: Notification) {
+
+    keyboardWindow = UIApplication.shared.windows
+      .filter { window in
+        guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+        return window.isKind(of: name)
+      }
+      .first
+
+    guard let window = keyboardWindow else { return }
+
+    window.layer.speed = 0
+//    window.layer.removeAllAnimations()
+//    UIView.performWithoutAnimation {
+//      keyboardWindow?.frame = .init(x: 0, y: 0, width: window.frame.width, height: window.frame.height)
+//    }
+
+  }
+
+  @objc
+  private func keyboardDidShowNotification(_ note: Notification) {
+
+  }
+
+  @objc
   private func applicationDidFinishLaunching(_ note: Notification) {
 
     UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
@@ -319,7 +358,7 @@ public class FeuilleView: TouchThroughView {
     keyboardFrame = result.frame
 
     if keyboardFrame.height > 0 {
-      // keyboardが開くときはbottomViewを閉じる
+//       keyboardが開くときはbottomViewを閉じる
       set(constraint: bottomViewHeight, value: 0, animated: false)
     }
 
