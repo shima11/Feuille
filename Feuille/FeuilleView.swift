@@ -156,27 +156,13 @@ public class FeuilleView: TouchThroughView {
       bottomViewHeight = bottomView.heightAnchor.constraint(equalToConstant: 0)
       bottomViewHeight.isActive = true
 
-      if #available(iOS 11.0, *) {
+      bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: bottomAnchor)
 
-        bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
-
-        NSLayoutConstraint.activate([
-          bottomView.rightAnchor.constraint(equalTo: rightAnchor),
-          bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomViewBottomConstraint
-          ])
-
-      } else {
-
-        bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: bottomAnchor)
-
-        NSLayoutConstraint.activate([
-          bottomView.rightAnchor.constraint(equalTo: rightAnchor),
-          bottomView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomViewBottomConstraint
-          ])
-
-      }
+      NSLayoutConstraint.activate([
+        bottomView.rightAnchor.constraint(equalTo: rightAnchor),
+        bottomView.leftAnchor.constraint(equalTo: leftAnchor),
+        bottomViewBottomConstraint
+        ])
 
     }
 
@@ -417,7 +403,7 @@ public class FeuilleView: TouchThroughView {
         else {
           set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
           set(constraint: bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
-          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
+          delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height)
         }
 
       default:
