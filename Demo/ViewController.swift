@@ -154,18 +154,19 @@ extension ViewController: FeuilleViewDelegate {
 
     func didChangeHeight(height: CGFloat) {
 
-        print("height:", height)
+//        print("height:", height)
 
         collectionView.contentInset = .init(
             top: collectionView.contentInset.top,
             left: collectionView.contentInset.left,
-            bottom: height + insets.bottom,
+            bottom: insets.bottom + height,
             right: collectionView.contentInset.right
         )
+
         collectionView.scrollIndicatorInsets = .init(
             top: collectionView.scrollIndicatorInsets.top,
             left: collectionView.scrollIndicatorInsets.left,
-            bottom: height + insets.bottom,
+            bottom: insets.bottom + height,
             right: collectionView.scrollIndicatorInsets.right
         )
 
