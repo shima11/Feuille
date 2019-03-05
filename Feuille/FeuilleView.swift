@@ -8,6 +8,8 @@
 
 import Foundation
 
+#warning("keyboardを表示している状態で、BottomViewの表示切り替え")
+
 public protocol FeuilleViewDelegate: class {
 
   // height of keyboard or bottomview
@@ -306,11 +308,11 @@ public class FeuilleView: TouchThroughView {
 
     if keyboardFrame.height > 0 {
       // keyboardが開くときはbottomViewを閉じる
-      set(constraint: bottomViewHeight, value: 0, animated: true)
+      set(constraint: bottomViewHeight, value: 0, animated: false)
     }
 
     set(
-      constraint: self.keyboardHeight,
+      constraint: keyboardHeight,
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: result.duration,
