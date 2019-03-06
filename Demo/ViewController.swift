@@ -45,7 +45,6 @@ class ViewController: UIViewController {
         collectionView.keyboardDismissMode = .interactive
 
         feuilleView.delegate = self
-        feuilleView.set(middleView: customTextView, animated: true)
 
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
@@ -58,22 +57,25 @@ class ViewController: UIViewController {
         view.addGestureRecognizer(gesture)
 
         feuilleView.easy.layout(Edges())
+        collectionView.easy.layout(Edges())
 
-        if #available(iOS 11.0, *) {
-            collectionView.easy.layout(
-                Top(),
-                Left(),
-                Bottom().to(view.safeAreaLayoutGuide, .bottom),
-                Right()
-            )
-        } else {
-            collectionView.easy.layout(
-                Top(),
-                Left(),
-                Bottom().to(bottomLayoutGuide, .top),
-                Right()
-            )
-        }
+//        if #available(iOS 11.0, *) {
+//            collectionView.easy.layout(
+//                Top(),
+//                Left(),
+//                Bottom().to(view.safeAreaLayoutGuide, .bottom),
+//                Right()
+//            )
+//        } else {
+//            collectionView.easy.layout(
+//                Top(),
+//                Left(),
+//                Bottom().to(bottomLayoutGuide, .top),
+//                Right()
+//            )
+//        }
+
+        feuilleView.set(middleView: customTextView, animated: true)
 
     }
 
@@ -96,8 +98,7 @@ class ViewController: UIViewController {
 
         feuilleView.endEditing(true)
 
-        feuilleView.dismiss(type: .top, animated: true)
-        feuilleView.dismiss(type: .bottom, animated: true)
+        feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
 
 }
@@ -156,17 +157,26 @@ extension ViewController: FeuilleViewDelegate {
 
     func didChangeHeight(height: CGFloat) {
 
+        print("height:", height)
+
+        let safeAreaBottomInset: CGFloat
+        if #available(iOS 11.0, *) {
+           safeAreaBottomInset  = view.safeAreaInsets.bottom
+        } else {
+            safeAreaBottomInset = bottomLayoutGuide.length
+        }
+
         collectionView.contentInset = .init(
             top: collectionView.contentInset.top,
             left: collectionView.contentInset.left,
-            bottom: insets.bottom + height,
+            bottom: insets.bottom + height - safeAreaBottomInset,
             right: collectionView.contentInset.right
         )
 
         collectionView.scrollIndicatorInsets = .init(
             top: collectionView.scrollIndicatorInsets.top,
             left: collectionView.scrollIndicatorInsets.left,
-            bottom: insets.bottom + height,
+            bottom: insets.bottom + height - safeAreaBottomInset,
             right: collectionView.scrollIndicatorInsets.right
         )
 
@@ -235,10 +245,6 @@ class StanpView: UIView {
 
 class CustomInputView: UIView {
 
-    override var intrinsicContentSize: CGSize {
-        return .init(width: UIView.noIntrinsicMetric, height: 44)
-    }
-
     public let photoButton = UIButton(type: .system)
     public let previewButton = UIButton(type: .system)
     public let stanpButton = UIButton(type: .system)
@@ -267,6 +273,7 @@ class CustomInputView: UIView {
         textView.isScrollEnabled = false
         textView.contentInset = .init(top: 8, left: 16, bottom: 8, right: 16)
         textView.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        textView.layer.cornerRadius = textView.intrinsicContentSize.height / 2
 
         photoButton.setTitle("Photo", for: .normal)
         previewButton.setTitle("Preview", for: .normal)
@@ -278,29 +285,28 @@ class CustomInputView: UIView {
 
         photoButton.easy.layout(
             Left(16),
-            CenterY()
+            Top(>=8),
+            Bottom(8)
         )
 
         previewButton.easy.layout(
             Left(16).to(photoButton, .right),
-            CenterY()
+            Top(>=8),
+            Bottom(8)
         )
 
         stanpButton.easy.layout(
             Left(16).to(previewButton, .right),
-            CenterY()
+            Top(>=8),
+            Bottom(8)
         )
 
         textView.easy.layout(
             Left(16).to(stanpButton, .right),
             Right(16),
-            CenterY()
+            Top(8),
+            Bottom(8)
         )
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        textView.layer.cornerRadius = textView.bounds.height / 2
     }
 
     required init?(coder aDecoder: NSCoder) {
