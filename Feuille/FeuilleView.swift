@@ -68,6 +68,7 @@ public class FeuilleView: TouchThroughView {
 
     panRecognizer.delegate = self
     panRecognizer.addTarget(self, action: #selector(panGesture(_:)))
+    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
 
     addSubview(topView)
     addSubview(middleView)
