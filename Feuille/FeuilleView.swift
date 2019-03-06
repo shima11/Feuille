@@ -217,19 +217,20 @@ public class FeuilleView: TouchThroughView {
 
   }
 
-  public func dismiss(type: ItemType, animated: Bool) {
+  public func dismiss(types: [ItemType], animated: Bool) {
 
-    switch type {
-    case .top:
+    if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
-      delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height)
-    case .middle:
-      set(constraint: middleViewHeight, value: 0, animated: animated)
-      delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height)
-    case .bottom:
-      set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: animated)
-      delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height)
     }
+    if types.contains(.middle) {
+      set(constraint: middleViewHeight, value: 0, animated: animated)
+    }
+    if types.contains(.bottom) {
+      set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: animated)
+    }
+
+    let bottomHeight = bottomViewHeight.constant - bottomViewBottomConstraint.constant
+    delegate?.didChangeHeight(height: middleViewHeight.constant + topViewHeight.constant + bottomHeight)
 
   }
 
