@@ -418,8 +418,7 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func panGesture(_ recognizer: UIPanGestureRecognizer) {
 
-    if bottomViewHeight.constant > 0 {
-
+    if bottomViewHeight.constant > 0 && bottomViewBottomConstraint.constant < bottomViewHeight.constant{
       // BottomViewが表示されている場合
 
       switch recognizer.state {
@@ -444,7 +443,6 @@ public class FeuilleView: TouchThroughView {
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
           #warning("scrollのvelocityも考慮してanimationする")
           set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
-
           delegate?.didChangeHeight(height: middleView.frame.height)
         }
         else {
