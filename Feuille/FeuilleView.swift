@@ -9,6 +9,7 @@
 import Foundation
 
 #warning("bottomView → keyboard animation")
+#warning("Correspondence when the height of ContentView changes.")
 
 public protocol FeuilleViewDelegate: class {
 
@@ -48,7 +49,7 @@ public class FeuilleView: TouchThroughView {
   private var keyboardFrame: CGRect
   private let defaultKeyboardFrame: CGRect
 
-  private var keyboardWindow: UIWindow? = nil
+//  private var keyboardWindow: UIWindow? = nil
 
   // MARK: - Initializers
 
@@ -97,9 +98,8 @@ public class FeuilleView: TouchThroughView {
       topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
       topViewHeight.isActive = true
 
-      #warning("適当なしきい値")
       NSLayoutConstraint.activate([
-        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 24),
+        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 0),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
         topView.leftAnchor.constraint(equalTo: leftAnchor),
         topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
@@ -203,7 +203,7 @@ public class FeuilleView: TouchThroughView {
     bottomView.set(bodyView: view)
 
     if keyboardHeight.constant > 0 {
-      // keybaordがある場合はアニメーションなし
+      // If there is a keyboard, no animation.
       dismissKeyboard(animated: false, force: true)
       set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: false)
       set(constraint: bottomViewBottomConstraint, value: 0, animated: false)
@@ -323,26 +323,14 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillShowNotification(_ note: Notification) {
 
-    keyboardWindow = UIApplication.shared.windows
-      .filter { window in
-        guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
-        return window.isKind(of: name)
-      }
-      .first
-
+//    keyboardWindow = UIApplication.shared.windows
+//      .filter { window in
+//        guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+//        return window.isKind(of: name)
+//      }
+//      .first
 //    guard let window = keyboardWindow else { return }
-
 //    window.layer.speed = 0
-
-//    window.layer.timeOffset = 0.25
-//    window.layer.removeAllAnimations()
-//    UIView.performWithoutAnimation {
-//      keyboardWindow?.frame = .init(x: 0, y: 0, width: window.frame.width, height: window.frame.height)
-//    }
-//    window.layer.speed = 1
-
-//    window.layer.animationKeys()
-
 
   }
 
@@ -352,7 +340,7 @@ public class FeuilleView: TouchThroughView {
 //    guard let window = keyboardWindow else { return }
 //    window.layer.speed = 1
 
-    keyboardWindow = nil
+//    keyboardWindow = nil
   }
 
   @objc
@@ -443,21 +431,17 @@ public class FeuilleView: TouchThroughView {
           else { return }
 
         let origin = recognizer.location(in: window)
-
-        let threthold = bounds.height - bottomView.intrinsicContentSize.height // - middleView.intrinsicContentSize.height
-
+        let threthold = bounds.height - bottomView.intrinsicContentSize.height
         let length = origin.y - threthold
 
         if length > 0 {
-
           set(constraint: bottomViewBottomConstraint, value: length, animated: false)
           delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length)
         }
 
       case .ended, .cancelled, .failed:
 
-        #warning("適当なしきい値")
-        if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.6 {
+        if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
           #warning("scrollのvelocityも考慮してanimationする")
           set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
           set(constraint: bottomViewHeight, value: 0, animated: true)
