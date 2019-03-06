@@ -35,7 +35,6 @@ public class FeuilleView: TouchThroughView {
   private var keyboardHeight: NSLayoutConstraint!
 
   private var topViewHeight: NSLayoutConstraint!
-  private var middleViewHeight: NSLayoutConstraint!
   private var bottomViewHeight: NSLayoutConstraint!
 
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
@@ -112,8 +111,6 @@ public class FeuilleView: TouchThroughView {
 
       middleView.translatesAutoresizingMaskIntoConstraints = false
 
-      middleViewHeight = middleView.heightAnchor.constraint(equalToConstant: 0)
-
       bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
       bottomMiddleToKeyboardConstraint.priority = .defaultLow
       bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
@@ -122,7 +119,6 @@ public class FeuilleView: TouchThroughView {
       if #available(iOS 11.0, *) {
 
         NSLayoutConstraint.activate([
-          middleViewHeight,
           middleView.rightAnchor.constraint(equalTo: rightAnchor),
           middleView.leftAnchor.constraint(equalTo: leftAnchor),
           bottomMiddleToKeyboardConstraint,
@@ -192,9 +188,16 @@ public class FeuilleView: TouchThroughView {
 
   public func set(middleView view: UIView, animated: Bool) {
 
-    middleView.set(bodyView: view)
+    view.translatesAutoresizingMaskIntoConstraints = false
 
-    set(constraint: middleViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+    NSLayoutConstraint.activate([
+      view.topAnchor.constraint(equalTo: middleView.topAnchor),
+      view.rightAnchor.constraint(equalTo: middleView.rightAnchor),
+      view.leftAnchor.constraint(equalTo: middleView.leftAnchor),
+      view.bottomAnchor.constraint(equalTo: middleView.bottomAnchor),
+      ])
+
+    middleView.set(bodyView: view)
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
@@ -222,15 +225,12 @@ public class FeuilleView: TouchThroughView {
     if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
     }
-    if types.contains(.middle) {
-      set(constraint: middleViewHeight, value: 0, animated: animated)
-    }
     if types.contains(.bottom) {
       set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: animated)
     }
 
     let bottomHeight = bottomViewHeight.constant - bottomViewBottomConstraint.constant
-    delegate?.didChangeHeight(height: middleViewHeight.constant + topViewHeight.constant + bottomHeight)
+    delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height + topViewHeight.constant + bottomHeight)
 
   }
 
