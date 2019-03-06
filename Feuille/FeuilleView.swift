@@ -97,9 +97,9 @@ public class FeuilleView: TouchThroughView {
       topView.translatesAutoresizingMaskIntoConstraints = false
 
       topViewHeight = topView.heightAnchor.constraint(equalToConstant: 0)
-      topViewHeight.isActive = true
 
       NSLayoutConstraint.activate([
+        topViewHeight,
         topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 0),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
         topView.leftAnchor.constraint(equalTo: leftAnchor),
@@ -113,7 +113,6 @@ public class FeuilleView: TouchThroughView {
       middleView.translatesAutoresizingMaskIntoConstraints = false
 
       middleViewHeight = middleView.heightAnchor.constraint(equalToConstant: 0)
-      middleViewHeight.isActive = true
 
       bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
       bottomMiddleToKeyboardConstraint.priority = .defaultLow
@@ -123,6 +122,7 @@ public class FeuilleView: TouchThroughView {
       if #available(iOS 11.0, *) {
 
         NSLayoutConstraint.activate([
+          middleViewHeight,
           middleView.rightAnchor.constraint(equalTo: rightAnchor),
           middleView.leftAnchor.constraint(equalTo: leftAnchor),
           bottomMiddleToKeyboardConstraint,
@@ -153,11 +153,11 @@ public class FeuilleView: TouchThroughView {
       bottomView.translatesAutoresizingMaskIntoConstraints = false
 
       bottomViewHeight = bottomView.heightAnchor.constraint(equalToConstant: 0)
-      bottomViewHeight.isActive = true
 
       bottomViewBottomConstraint = bottomView.bottomAnchor.constraint(equalTo: bottomAnchor)
 
       NSLayoutConstraint.activate([
+        bottomViewHeight,
         bottomView.rightAnchor.constraint(equalTo: rightAnchor),
         bottomView.leftAnchor.constraint(equalTo: leftAnchor),
         bottomViewBottomConstraint
@@ -227,8 +227,7 @@ public class FeuilleView: TouchThroughView {
       set(constraint: middleViewHeight, value: 0, animated: animated)
       delegate?.didChangeHeight(height: bottomView.intrinsicContentSize.height)
     case .bottom:
-      set(constraint: bottomViewHeight, value: 0, animated: animated)
-      set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
+      set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: animated)
       delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height)
     }
 
@@ -359,7 +358,7 @@ public class FeuilleView: TouchThroughView {
 
     if keyboardFrame.height > 0 {
 //       keyboardが開くときはbottomViewを閉じる
-      set(constraint: bottomViewHeight, value: 0, animated: false)
+      set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: false)
     }
 
     set(
@@ -444,8 +443,8 @@ public class FeuilleView: TouchThroughView {
 
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
           #warning("scrollのvelocityも考慮してanimationする")
-          set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
-          set(constraint: bottomViewHeight, value: 0, animated: true)
+          set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
+
           delegate?.didChangeHeight(height: middleView.frame.height)
         }
         else {
