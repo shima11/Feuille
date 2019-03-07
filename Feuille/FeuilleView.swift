@@ -48,6 +48,8 @@ public class FeuilleView: TouchThroughView {
   private var keyboardFrame: CGRect
   private let defaultKeyboardFrame: CGRect
 
+  private var oldFeuilleKeyboardHeight: CGFloat = 0.0
+  
   // MARK: - Initializers
 
   public init() {
@@ -164,8 +166,6 @@ public class FeuilleView: TouchThroughView {
 
     set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
-
   }
 
   public func set(middleView view: UIView, animated: Bool) {
@@ -191,7 +191,6 @@ public class FeuilleView: TouchThroughView {
         ])
     }
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
 
   public func set(bottomView view: UIView, animated: Bool) {
@@ -208,8 +207,6 @@ public class FeuilleView: TouchThroughView {
       set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
     }
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
-
   }
 
   public func dismiss(types: [ItemType], animated: Bool) {
@@ -221,7 +218,6 @@ public class FeuilleView: TouchThroughView {
       set(constraint: bottomViewBottomConstraint, value: bottomView.frame.height, animated: animated)
     }
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
 
   public func dismissKeyboard(animated: Bool, force: Bool) {
@@ -235,11 +231,20 @@ public class FeuilleView: TouchThroughView {
     }
   }
 
+  private func didChangeHeightIfNeeded() {
+
+    let height = feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight)
+    if height != oldFeuilleKeyboardHeight {
+      delegate?.didChangeHeight(height: height)
+    }
+    oldFeuilleKeyboardHeight = height
+  }
+
   public override func layoutSubviews() {
 
     super.layoutSubviews()
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
+    didChangeHeightIfNeeded()
   }
 
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
@@ -275,8 +280,8 @@ public class FeuilleView: TouchThroughView {
     } else {
 
       constraint.constant = value
-
     }
+
   }
 
   private func startObserveKeyboard() {
@@ -330,7 +335,6 @@ public class FeuilleView: TouchThroughView {
 
   @objc
   private func applicationDidFinishLaunching(_ note: Notification) {
-
     UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
   }
 
@@ -354,7 +358,6 @@ public class FeuilleView: TouchThroughView {
       animationOptions: [result.curve, .beginFromCurrentState]
     )
 
-    delegate?.didChangeHeight(height: UIScreen.main.bounds.height - keyboardFrame.minY)
   }
 
   @objc
@@ -372,7 +375,6 @@ public class FeuilleView: TouchThroughView {
       animationOptions: [result.curve, .beginFromCurrentState]
     )
 
-    delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
 
   private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
@@ -428,14 +430,10 @@ public class FeuilleView: TouchThroughView {
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
           #warning("scrollのvelocityも考慮してanimationする")
           set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
-
-          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
         }
         else {
           set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
           set(constraint: bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
-
-          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
         }
 
       default:
@@ -461,7 +459,6 @@ public class FeuilleView: TouchThroughView {
       let _keyboardHeight = UIScreen.main.bounds.height - keyboardFrame.minY
 
       set(constraint: keyboardHeight, value: _keyboardHeight, animated: false)
-      delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
 
     }
   }
