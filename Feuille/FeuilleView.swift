@@ -8,8 +8,8 @@
 
 import Foundation
 
-#warning("bottomView → keyboard animation")
-#warning("Correspondence when the height of ContentView changes.")
+#warning("bottomView → keyboard animation without animation")
+#warning("アニメーション中のmiddleviewとkeyboardの隙間→animationの計算がんばる")
 
 public protocol FeuilleViewDelegate: class {
 
@@ -47,8 +47,6 @@ public class FeuilleView: TouchThroughView {
 
   private var keyboardFrame: CGRect
   private let defaultKeyboardFrame: CGRect
-
-//  private var keyboardWindow: UIWindow? = nil
 
   // MARK: - Initializers
 
@@ -116,31 +114,15 @@ public class FeuilleView: TouchThroughView {
       bottomMiddleToBottomConstraint = middleView.bottomAnchor.constraint(equalTo: bottomView.topAnchor)
       bottomMiddleToBottomConstraint.priority = .defaultLow
 
-      if #available(iOS 11.0, *) {
-
-        NSLayoutConstraint.activate([
-          middleView.rightAnchor.constraint(equalTo: rightAnchor),
-          middleView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomMiddleToKeyboardConstraint,
-          bottomMiddleToBottomConstraint,
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.bottomAnchor)
-          ])
-
-      } else {
-
-        NSLayoutConstraint.activate([
-          middleView.rightAnchor.constraint(equalTo: rightAnchor),
-          middleView.leftAnchor.constraint(equalTo: leftAnchor),
-          bottomMiddleToKeyboardConstraint,
-          bottomMiddleToBottomConstraint,
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
-          middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
-          ])
-
-      }
+      NSLayoutConstraint.activate([
+        middleView.rightAnchor.constraint(equalTo: rightAnchor),
+        middleView.leftAnchor.constraint(equalTo: leftAnchor),
+        bottomMiddleToKeyboardConstraint,
+        bottomMiddleToBottomConstraint,
+        middleView.bottomAnchor.constraint(lessThanOrEqualTo: keyboardLayoutGuide.topAnchor),
+        middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomView.topAnchor),
+        middleView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
+        ])
 
     }
 
@@ -189,15 +171,25 @@ public class FeuilleView: TouchThroughView {
   public func set(middleView view: UIView, animated: Bool) {
 
     middleView.set(bodyView: view)
+    middleView.backgroundColor = view.backgroundColor
 
     view.translatesAutoresizingMaskIntoConstraints = false
 
-    NSLayoutConstraint.activate([
-      view.topAnchor.constraint(equalTo: middleView.topAnchor),
-      view.rightAnchor.constraint(equalTo: middleView.rightAnchor),
-      view.leftAnchor.constraint(equalTo: middleView.leftAnchor),
-      view.bottomAnchor.constraint(equalTo: middleView.bottomAnchor),
-      ])
+    if #available(iOS 11.0, *) {
+      NSLayoutConstraint.activate([
+        view.topAnchor.constraint(equalTo: middleView.topAnchor),
+        view.rightAnchor.constraint(equalTo: middleView.rightAnchor),
+        view.leftAnchor.constraint(equalTo: middleView.leftAnchor),
+        view.bottomAnchor.constraint(equalTo: middleView.safeAreaLayoutGuide.bottomAnchor),
+        ])
+    } else {
+      NSLayoutConstraint.activate([
+        view.topAnchor.constraint(equalTo: middleView.topAnchor),
+        view.rightAnchor.constraint(equalTo: middleView.rightAnchor),
+        view.leftAnchor.constraint(equalTo: middleView.leftAnchor),
+        view.bottomAnchor.constraint(equalTo: middleView.bottomAnchor),
+        ])
+    }
 
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
@@ -229,10 +221,6 @@ public class FeuilleView: TouchThroughView {
       set(constraint: bottomViewBottomConstraint, value: bottomView.frame.height, animated: animated)
     }
 
-//    let bottomHeight = bottomViewHeight.constant - bottomViewBottomConstraint.constant
-//
-//    delegate?.didChangeHeight(height: middleView.intrinsicContentSize.height + topViewHeight.constant + bottomHeight)
-
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
 
@@ -248,18 +236,18 @@ public class FeuilleView: TouchThroughView {
   }
 
   public override func layoutSubviews() {
+
     super.layoutSubviews()
+
     delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight))
   }
 
   private func feuilleKeyboardHeight(isIncludedTopViewHeight: Bool) -> CGFloat {
 
     if isIncludedTopViewHeight {
-//      return topView.intrinsicContentSize.height + middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
-      return bounds.height - topView.frame.maxY
+      return bounds.height - topView.frame.minY
     }
-    return bounds.height - middleView.frame.maxY
-//    return middleView.intrinsicContentSize.height + bottomView.intrinsicContentSize.height
+    return bounds.height - middleView.frame.minY
   }
 
   private func set(
@@ -333,24 +321,11 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillShowNotification(_ note: Notification) {
 
-//    keyboardWindow = UIApplication.shared.windows
-//      .filter { window in
-//        guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
-//        return window.isKind(of: name)
-//      }
-//      .first
-//    guard let window = keyboardWindow else { return }
-//    window.layer.speed = 0
-
   }
 
   @objc
   private func keyboardDidShowNotification(_ note: Notification) {
 
-//    guard let window = keyboardWindow else { return }
-//    window.layer.speed = 1
-
-//    keyboardWindow = nil
   }
 
   @objc
