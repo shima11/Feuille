@@ -14,13 +14,17 @@ import Foundation
 public protocol FeuilleViewDelegate: class {
 
   // height of keyboard or bottomview
-  func didChangeHeight(height: CGFloat)
+  func didChangeHeight(height: CGFloat, state: FeuilleView.InteractiveState)
 }
 
 public class FeuilleView: TouchThroughView {
 
   public enum ItemType {
     case top, middle, bottom
+  }
+
+  public enum InteractiveState {
+    case began, changed, completed
   }
 
   // MARK: - Properties
@@ -49,6 +53,8 @@ public class FeuilleView: TouchThroughView {
   private let defaultKeyboardFrame: CGRect
 
   private var oldFeuilleKeyboardHeight: CGFloat = 0.0
+
+  private var state: InteractiveState = .completed
   
   // MARK: - Initializers
 
@@ -235,7 +241,7 @@ public class FeuilleView: TouchThroughView {
 
     let height = feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight)
     if height != oldFeuilleKeyboardHeight {
-      delegate?.didChangeHeight(height: height)
+      delegate?.didChangeHeight(height: height, state: state)
     }
     oldFeuilleKeyboardHeight = height
   }
@@ -405,6 +411,15 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func panGesture(_ recognizer: UIPanGestureRecognizer) {
 
+    switch recognizer.state {
+    case .changed:
+      self.state = .changed
+    case .ended, .cancelled, .failed:
+      self.state = .completed
+    default:
+      break
+    }
+
     if bottomViewHeight.constant > 0 && bottomViewBottomConstraint.constant < bottomViewHeight.constant{
       // BottomViewが表示されている場合
 
@@ -422,7 +437,7 @@ public class FeuilleView: TouchThroughView {
 
         if length > 0 {
           set(constraint: bottomViewBottomConstraint, value: length, animated: false)
-          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length)
+          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, state: state)
         }
 
       case .ended, .cancelled, .failed:
