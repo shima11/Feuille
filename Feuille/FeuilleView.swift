@@ -13,8 +13,11 @@ import Foundation
 
 public protocol FeuilleViewDelegate: class {
 
+  func willShowKeybaord()
+  func willHideKeyboard()
+
   // height of keyboard or bottomview
-  func didChangeHeight(keyboardHeight: CGFloat, state: FeuilleView.InteractiveState)
+  func didChangeHeight(keyboardHeight: CGFloat, interactiveState: FeuilleView.InteractiveState)
 }
 
 public class FeuilleView: TouchThroughView {
@@ -25,6 +28,10 @@ public class FeuilleView: TouchThroughView {
 
   public enum InteractiveState {
     case began, changed, completed
+  }
+
+  public enum KeyboardState {
+    case hidden, showDefault, showCustom
   }
 
   // MARK: - Properties
@@ -52,9 +59,10 @@ public class FeuilleView: TouchThroughView {
   private var keyboardFrame: CGRect
   private let defaultKeyboardFrame: CGRect
 
-  private var oldFeuilleKeyboardHeight: CGFloat = 0.0
+  private var oldFeuilleKeyboardHeight: CGFloat = 0
 
-  private var state: InteractiveState = .completed
+  private var interactiveState: InteractiveState = .completed
+  private var keyboardState: KeyboardState = .hidden
   
   // MARK: - Initializers
 
@@ -201,6 +209,9 @@ public class FeuilleView: TouchThroughView {
 
   public func set(bottomView view: UIView, animated: Bool) {
 
+    keyboardState = .showCustom
+    delegate?.willShowKeybaord()
+
     bottomView.set(bodyView: view)
 
     if keyboardHeight.constant > 0 {
@@ -216,6 +227,9 @@ public class FeuilleView: TouchThroughView {
   }
 
   public func dismiss(types: [ItemType], animated: Bool) {
+
+    keyboardState = .hidden
+    delegate?.willHideKeyboard()
 
     if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
@@ -240,9 +254,11 @@ public class FeuilleView: TouchThroughView {
   private func didChangeHeightIfNeeded() {
 
     let height = feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight)
+
     if height != oldFeuilleKeyboardHeight {
-      delegate?.didChangeHeight(keyboardHeight: height, state: state)
+      delegate?.didChangeHeight(keyboardHeight: height, interactiveState: interactiveState)
     }
+
     oldFeuilleKeyboardHeight = height
   }
 
@@ -266,7 +282,7 @@ public class FeuilleView: TouchThroughView {
     value: CGFloat,
     animated: Bool,
     animationDuration: TimeInterval = 0.25,
-    animationOptions: UIView.AnimationOptions = [.beginFromCurrentState]
+    animationOptions: UIView.AnimationOptions = [.beginFromCurrentState, .allowUserInteraction]
     ){
 
     if animated {
@@ -351,9 +367,14 @@ public class FeuilleView: TouchThroughView {
 
     keyboardFrame = result.frame
 
-    if keyboardFrame.height > 0 {
+    if keyboardFrame.maxY <= bounds.height {
+      keyboardState = .showDefault
 //       keyboardが開くときはbottomViewを閉じる
       set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: false)
+      delegate?.willShowKeybaord()
+    } else {
+      keyboardState = .hidden
+      delegate?.willShowKeybaord()
     }
 
     set(
@@ -361,13 +382,16 @@ public class FeuilleView: TouchThroughView {
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: result.duration,
-      animationOptions: [result.curve, .beginFromCurrentState]
+      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
     )
 
   }
 
   @objc
   private func keyboardWillHideFrame(_ note: Notification) {
+
+    keyboardState = .hidden
+    delegate?.willHideKeyboard()
 
     let result = calcurateKeyboardContext(note: note)
 
@@ -378,7 +402,7 @@ public class FeuilleView: TouchThroughView {
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
       animationDuration: result.duration,
-      animationOptions: [result.curve, .beginFromCurrentState]
+      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
     )
 
   }
@@ -413,16 +437,15 @@ public class FeuilleView: TouchThroughView {
 
     switch recognizer.state {
     case .changed:
-      self.state = .changed
+      self.interactiveState = .changed
     case .ended, .cancelled, .failed:
-      self.state = .completed
+      self.interactiveState = .completed
     default:
       break
     }
 
-    if bottomViewHeight.constant > 0 && bottomViewBottomConstraint.constant < bottomViewHeight.constant{
+    if bottomViewHeight.constant > 0 && bottomViewBottomConstraint.constant < bottomViewHeight.constant {
       // BottomViewが表示されている場合
-
       switch recognizer.state {
       case .changed:
 
@@ -437,13 +460,15 @@ public class FeuilleView: TouchThroughView {
 
         if length > 0 {
           set(constraint: bottomViewBottomConstraint, value: length, animated: false)
-          delegate?.didChangeHeight(keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, state: state)
+          delegate?.didChangeHeight(keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, interactiveState: interactiveState)
         }
 
       case .ended, .cancelled, .failed:
 
+        #warning("scrollのvelocityも考慮してanimationする")
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
-          #warning("scrollのvelocityも考慮してanimationする")
+          keyboardState = .hidden
+          delegate?.willHideKeyboard()
           set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
         }
         else {
