@@ -14,7 +14,7 @@ import Foundation
 public protocol FeuilleViewDelegate: class {
 
   // height of keyboard or bottomview
-  func didChangeHeight(height: CGFloat, state: FeuilleView.InteractiveState)
+  func didChangeHeight(keyboardHeight: CGFloat, state: FeuilleView.InteractiveState)
 }
 
 public class FeuilleView: TouchThroughView {
@@ -241,7 +241,7 @@ public class FeuilleView: TouchThroughView {
 
     let height = feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight)
     if height != oldFeuilleKeyboardHeight {
-      delegate?.didChangeHeight(height: height, state: state)
+      delegate?.didChangeHeight(keyboardHeight: height, state: state)
     }
     oldFeuilleKeyboardHeight = height
   }
@@ -437,7 +437,7 @@ public class FeuilleView: TouchThroughView {
 
         if length > 0 {
           set(constraint: bottomViewBottomConstraint, value: length, animated: false)
-          delegate?.didChangeHeight(height: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, state: state)
+          delegate?.didChangeHeight(keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, state: state)
         }
 
       case .ended, .cancelled, .failed:
