@@ -348,6 +348,9 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func keyboardWillShowNotification(_ note: Notification) {
 
+    keyboardState = .showDefault
+    delegate?.willShowKeybaord()
+
   }
 
   @objc
@@ -392,18 +395,6 @@ public class FeuilleView: TouchThroughView {
 
     keyboardState = .hidden
     delegate?.willHideKeyboard()
-
-    let result = calcurateKeyboardContext(note: note)
-
-    keyboardFrame = result.frame
-
-    set(
-      constraint: self.keyboardHeight,
-      value: UIScreen.main.bounds.height - keyboardFrame.minY,
-      animated: true,
-      animationDuration: result.duration,
-      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
-    )
 
   }
 
