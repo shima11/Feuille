@@ -209,9 +209,6 @@ public class FeuilleView: TouchThroughView {
 
   public func set(bottomView view: UIView, animated: Bool) {
 
-    keyboardState = .showCustom
-    delegate?.willShowKeybaord()
-
     bottomView.set(bodyView: view)
 
     if keyboardHeight.constant > 0 {
@@ -227,9 +224,6 @@ public class FeuilleView: TouchThroughView {
   }
 
   public func dismiss(types: [ItemType], animated: Bool) {
-
-    keyboardState = .hidden
-    delegate?.willHideKeyboard()
 
     if types.contains(.top) {
       set(constraint: topViewHeight, value: 0, animated: animated)
@@ -346,21 +340,18 @@ public class FeuilleView: TouchThroughView {
   }
 
   @objc
-  private func keyboardWillShowNotification(_ note: Notification) {
+  private func applicationDidFinishLaunching(_ note: Notification) {
+    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
+  }
 
-    keyboardState = .showDefault
-    delegate?.willShowKeybaord()
+  @objc
+  private func keyboardWillShowNotification(_ note: Notification) {
 
   }
 
   @objc
   private func keyboardDidShowNotification(_ note: Notification) {
 
-  }
-
-  @objc
-  private func applicationDidFinishLaunching(_ note: Notification) {
-    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
   }
 
   @objc
@@ -371,13 +362,15 @@ public class FeuilleView: TouchThroughView {
     keyboardFrame = result.frame
 
     if keyboardFrame.maxY <= bounds.height {
+      // keyboardが開くとき
       keyboardState = .showDefault
-//       keyboardが開くときはbottomViewを閉じる
+      delegate?.willShowKeybaord()
+      // bottomViewを非表示にする
       set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: false)
-      delegate?.willShowKeybaord()
     } else {
+      // keyboardが閉じるとき
       keyboardState = .hidden
-      delegate?.willShowKeybaord()
+      delegate?.willHideKeyboard()
     }
 
     set(
@@ -392,9 +385,6 @@ public class FeuilleView: TouchThroughView {
 
   @objc
   private func keyboardWillHideFrame(_ note: Notification) {
-
-    keyboardState = .hidden
-    delegate?.willHideKeyboard()
 
   }
 
