@@ -59,22 +59,6 @@ class ViewController: UIViewController {
         feuilleView.easy.layout(Edges())
         collectionView.easy.layout(Edges())
 
-//        if #available(iOS 11.0, *) {
-//            collectionView.easy.layout(
-//                Top(),
-//                Left(),
-//                Bottom().to(view.safeAreaLayoutGuide, .bottom),
-//                Right()
-//            )
-//        } else {
-//            collectionView.easy.layout(
-//                Top(),
-//                Left(),
-//                Bottom().to(bottomLayoutGuide, .top),
-//                Right()
-//            )
-//        }
-
         feuilleView.set(middleView: customTextView, animated: true)
 
     }
@@ -155,9 +139,17 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 
 extension ViewController: FeuilleViewDelegate {
 
-    func didChangeHeight(height: CGFloat) {
+    func willShowKeybaord() {
 
-        print("height:", height)
+    }
+
+    func willHideKeyboard() {
+
+    }
+
+    func didChangeHeight(keyboardHeight: CGFloat, interactiveState: FeuilleView.InteractiveState) {
+
+        print("height:", keyboardHeight)
 
         let safeAreaBottomInset: CGFloat
         if #available(iOS 11.0, *) {
@@ -169,14 +161,14 @@ extension ViewController: FeuilleViewDelegate {
         collectionView.contentInset = .init(
             top: collectionView.contentInset.top,
             left: collectionView.contentInset.left,
-            bottom: insets.bottom + height - safeAreaBottomInset,
+            bottom: insets.bottom + keyboardHeight - safeAreaBottomInset,
             right: collectionView.contentInset.right
         )
 
         collectionView.scrollIndicatorInsets = .init(
             top: collectionView.scrollIndicatorInsets.top,
             left: collectionView.scrollIndicatorInsets.left,
-            bottom: insets.bottom + height - safeAreaBottomInset,
+            bottom: insets.bottom + keyboardHeight - safeAreaBottomInset,
             right: collectionView.scrollIndicatorInsets.right
         )
 
