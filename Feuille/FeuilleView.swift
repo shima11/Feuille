@@ -168,6 +168,7 @@ public class FeuilleView: TouchThroughView {
 
   deinit {
     NotificationCenter.default.removeObserver(self)
+    UIApplication.shared.windows.first?.removeGestureRecognizer(self.panRecognizer)
   }
 
   // MARK: - Functions
