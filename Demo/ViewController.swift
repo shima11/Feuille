@@ -143,7 +143,15 @@ extension ViewController: FeuilleViewDelegate {
 
     }
 
+    func didShowKeyboard() {
+
+    }
+
     func willHideKeyboard() {
+
+    }
+
+    func didHideKeyboard() {
 
     }
 

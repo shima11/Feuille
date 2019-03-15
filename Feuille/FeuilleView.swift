@@ -14,7 +14,9 @@ import Foundation
 public protocol FeuilleViewDelegate: class {
 
   func willShowKeybaord()
+  func didShowKeyboard()
   func willHideKeyboard()
+  func didHideKeyboard()
 
   // height of keyboard or bottomview
   func didChangeHeight(keyboardHeight: CGFloat, interactiveState: FeuilleView.InteractiveState)
@@ -319,15 +321,22 @@ public class FeuilleView: TouchThroughView {
 
     NotificationCenter.default.addObserver(
       self,
-      selector: #selector(keyboardWillChangeFrame(_:)),
-      name: UIResponder.keyboardWillChangeFrameNotification,
+      selector: #selector(keyboardWillHideNotification(_:)),
+      name: UIResponder.keyboardWillHideNotification,
       object: nil
     )
 
     NotificationCenter.default.addObserver(
       self,
-      selector: #selector(keyboardWillHideFrame(_:)),
-      name: UIResponder.keyboardWillHideNotification,
+      selector: #selector(keyboardDidHideNotification(_:)),
+      name: UIResponder.keyboardDidHideNotification,
+      object: nil
+    )
+
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillChangeFrame(_:)),
+      name: UIResponder.keyboardWillChangeFrameNotification,
       object: nil
     )
 
@@ -352,7 +361,7 @@ public class FeuilleView: TouchThroughView {
 
   @objc
   private func keyboardDidShowNotification(_ note: Notification) {
-
+    delegate?.didShowKeyboard()
   }
 
   @objc
@@ -385,7 +394,12 @@ public class FeuilleView: TouchThroughView {
   }
 
   @objc
-  private func keyboardWillHideFrame(_ note: Notification) {
+  private func keyboardWillHideNotification(_ note: Notification) {
+
+  }
+
+  @objc
+  private func keyboardDidHideNotification(_ note: Notification) {
 
   }
 
