@@ -32,10 +32,6 @@ public class FeuilleView: TouchThroughView {
     case began, changed, completed
   }
 
-  public enum KeyboardState {
-    case hidden, showDefault, showCustom
-  }
-
   // MARK: - Properties
 
   public let topView = ContentView()
@@ -64,8 +60,7 @@ public class FeuilleView: TouchThroughView {
   private var oldFeuilleKeyboardHeight: CGFloat = 0
 
   private var interactiveState: InteractiveState = .completed
-  private var keyboardState: KeyboardState = .hidden
-  
+
   // MARK: - Initializers
 
   public init() {
@@ -356,12 +351,22 @@ public class FeuilleView: TouchThroughView {
 
   @objc
   private func keyboardWillShowNotification(_ note: Notification) {
-
+    delegate?.willShowKeybaord()
   }
 
   @objc
   private func keyboardDidShowNotification(_ note: Notification) {
     delegate?.didShowKeyboard()
+  }
+
+  @objc
+  private func keyboardWillHideNotification(_ note: Notification) {
+    delegate?.willHideKeyboard()
+  }
+
+  @objc
+  private func keyboardDidHideNotification(_ note: Notification) {
+    delegate?.didHideKeyboard()
   }
 
   @objc
@@ -373,13 +378,11 @@ public class FeuilleView: TouchThroughView {
 
     if keyboardFrame.maxY <= bounds.height {
       // keyboardが開くとき
-      keyboardState = .showDefault
       delegate?.willShowKeybaord()
       // bottomViewを非表示にする
       set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: false)
     } else {
       // keyboardが閉じるとき
-      keyboardState = .hidden
       delegate?.willHideKeyboard()
     }
 
@@ -390,16 +393,6 @@ public class FeuilleView: TouchThroughView {
       animationDuration: result.duration,
       animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
     )
-
-  }
-
-  @objc
-  private func keyboardWillHideNotification(_ note: Notification) {
-
-  }
-
-  @objc
-  private func keyboardDidHideNotification(_ note: Notification) {
 
   }
 
@@ -463,7 +456,6 @@ public class FeuilleView: TouchThroughView {
 
         #warning("scrollのvelocityも考慮してanimationする")
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
-          keyboardState = .hidden
           delegate?.willHideKeyboard()
           set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
         }
