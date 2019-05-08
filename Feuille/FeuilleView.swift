@@ -10,6 +10,8 @@ import Foundation
 
 #warning("bottomView → keyboard animation without animation")
 #warning("アニメーション中のmiddleviewとkeyboardの隙間→animationの計算がんばる")
+#warning("はみ出しの考慮（高さと上部のマージンが衝突した場合など）")
+#warning("middleViewとsafeAreaのスペースの埋め方")
 
 public protocol FeuilleViewDelegate: class {
 
