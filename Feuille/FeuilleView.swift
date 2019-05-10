@@ -12,6 +12,7 @@ import Foundation
 #warning("アニメーション中のmiddleviewとkeyboardの隙間→animationの計算がんばる")
 #warning("はみ出しの考慮（高さと上部のマージンが衝突した場合など）")
 #warning("middleViewとsafeAreaのスペースの埋め方")
+#warning("端末の回転への対応")
 
 public protocol FeuilleViewDelegate: class {
 

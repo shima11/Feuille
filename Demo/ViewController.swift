@@ -12,6 +12,8 @@ import EasyPeasy
 
 import Feuille
 
+#warning("ScrollViewのスクロール対応をFeuilleとは分けて実装（キーボード表示時、Cellの追加時、ContentViewの下部時の対応）")
+#warning("BottomViewをタップしてもBottomViewが閉じてしまう問題")
 
 class ViewController: UIViewController {
 
@@ -28,6 +30,8 @@ class ViewController: UIViewController {
     var height: NSLayoutConstraint!
 
     private let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+    
+    var items: [Int] = (0...10).map { _ in Int.random(in: 0...100) }
 
     override func viewDidLoad() {
         
@@ -50,7 +54,8 @@ class ViewController: UIViewController {
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
         customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
-
+        customTextView.sendButton.addTarget(self, action: #selector(didTapSendButton), for: .touchUpInside)
+        
         photosView.backgroundColor = .darkGray
         stanpView.backgroundColor = .orange
 
@@ -85,6 +90,15 @@ class ViewController: UIViewController {
 
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
+    
+    @objc func didTapSendButton() {
+        
+        items.append(Int.random(in: 0...100))
+        
+        let indexPath = IndexPath.init(row: items.count - 1, section: 0)
+        collectionView.insertItems(at: [indexPath])
+        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+    }
 
 }
 
@@ -102,12 +116,17 @@ extension ViewController: UICollectionViewDataSource {
         inputView.clipsToBounds = true
         cell.addSubview(inputView)
         inputView.easy.layout(Edges(8))
-
+        
+        let label = UILabel()
+        label.text = "\(items[indexPath.row])"
+        inputView.addSubview(label)
+        label.easy.layout(Center())
+        
         return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20
+        return items.count
     }
 
 }
@@ -258,11 +277,11 @@ class CustomInputView: UIView {
     public let previewButton = UIButton(type: .system)
     public let stanpButton = UIButton(type: .system)
     public let textView = UITextView()
+    public let sendButton = UIButton(type: .system)
 
     override func becomeFirstResponder() -> Bool {
         return textView.becomeFirstResponder()
     }
-
 
     override func resignFirstResponder() -> Bool {
         return textView.resignFirstResponder()
@@ -275,6 +294,7 @@ class CustomInputView: UIView {
         addSubview(previewButton)
         addSubview(stanpButton)
         addSubview(textView)
+        addSubview(sendButton)
 
         backgroundColor = .white
 
@@ -285,12 +305,14 @@ class CustomInputView: UIView {
         textView.layer.cornerRadius = textView.intrinsicContentSize.height / 2
 
         photoButton.setTitle("Photo", for: .normal)
-        previewButton.setTitle("Preview", for: .normal)
-        stanpButton.setTitle("Stanp", for: .normal)
+        previewButton.setTitle("Top", for: .normal)
+        stanpButton.setTitle("Stamp", for: .normal)
+        sendButton.setTitle("Send", for: .normal)
 
         photoButton.setContentHuggingPriority(.required, for: .horizontal)
         previewButton.setContentHuggingPriority(.required, for: .horizontal)
         stanpButton.setContentHuggingPriority(.required, for: .horizontal)
+        sendButton.setContentHuggingPriority(.required, for: .horizontal)
 
         photoButton.easy.layout(
             Left(16),
@@ -312,8 +334,14 @@ class CustomInputView: UIView {
 
         textView.easy.layout(
             Left(16).to(stanpButton, .right),
-            Right(16),
             Top(8),
+            Bottom(8)
+        )
+        
+        sendButton.easy.layout(
+            Left(16).to(textView, .right),
+            Right(16),
+            Top(>=8),
             Bottom(8)
         )
     }
