@@ -40,8 +40,6 @@ class ViewController: UIViewController {
         view.addSubview(collectionView)
         view.addSubview(feuilleView)
 
-        collectionView.contentSize = .init(width: UIScreen.main.bounds.width, height: 1000)
-
         collectionView.delegate = self
         collectionView.dataSource = self
 
@@ -86,6 +84,8 @@ class ViewController: UIViewController {
 
     @objc func didTapView() {
 
+        #warning("BottomViewをタップしたときも呼ばれてしまう")
+        
         feuilleView.endEditing(true)
 
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
@@ -206,6 +206,11 @@ extension ViewController: FeuilleViewDelegate {
             bottom: insets.bottom + keyboardHeight - safeAreaBottomInset,
             right: collectionView.scrollIndicatorInsets.right
         )
+        
+        #warning("キーボードの上昇分だけCollectionViewをスライドさせる")
+//        let currentContentOffset = collectionView.contentOffset
+//        let newContentOffset = CGPoint.init(x: currentContentOffset.x, y: currentContentOffset.y + keyboardHeight)
+//        collectionView.setContentOffset(newContentOffset, animated: true)
 
     }
 
