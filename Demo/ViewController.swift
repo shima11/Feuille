@@ -54,8 +54,9 @@ class ViewController: UIViewController {
         customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
         customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
         customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
-        customTextView.sendButton.addTarget(self, action: #selector(didTapSendButton), for: .touchUpInside)
-        
+        customTextView.addButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
+        customTextView.removeButton.addTarget(self, action: #selector(didTapRemoveButton), for: .touchUpInside)
+
         photosView.backgroundColor = .darkGray
         stanpView.backgroundColor = .orange
 
@@ -90,7 +91,7 @@ class ViewController: UIViewController {
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
     
-    @objc func didTapSendButton() {
+    @objc func didTapAddButton() {
         
         items.append(Int.random(in: 0...100))
         
@@ -99,6 +100,17 @@ class ViewController: UIViewController {
         collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
 
+    @objc func didTapRemoveButton() {
+        
+        guard items.count > 1 else { return }
+
+        items.removeLast()
+
+        let indexPath = IndexPath.init(row: items.count - 1, section: 0)
+        collectionView.deleteItems(at: [indexPath])
+        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+    }
+    
 }
 
 // MARK: - UICollectionViewDataSource
@@ -285,7 +297,8 @@ class CustomInputView: UIView {
     public let previewButton = UIButton(type: .system)
     public let stanpButton = UIButton(type: .system)
     public let textView = UITextView()
-    public let sendButton = UIButton(type: .system)
+    public let addButton = UIButton(type: .system)
+    public let removeButton = UIButton(type: .system)
 
     override func becomeFirstResponder() -> Bool {
         return textView.becomeFirstResponder()
@@ -302,7 +315,8 @@ class CustomInputView: UIView {
         addSubview(previewButton)
         addSubview(stanpButton)
         addSubview(textView)
-        addSubview(sendButton)
+        addSubview(addButton)
+        addSubview(removeButton)
 
         backgroundColor = .white
 
@@ -315,12 +329,14 @@ class CustomInputView: UIView {
         photoButton.setTitle("Photo", for: .normal)
         previewButton.setTitle("Top", for: .normal)
         stanpButton.setTitle("Stamp", for: .normal)
-        sendButton.setTitle("Send", for: .normal)
+        addButton.setTitle("+", for: .normal)
+        removeButton.setTitle("-", for: .normal)
 
         photoButton.setContentHuggingPriority(.required, for: .horizontal)
         previewButton.setContentHuggingPriority(.required, for: .horizontal)
         stanpButton.setContentHuggingPriority(.required, for: .horizontal)
-        sendButton.setContentHuggingPriority(.required, for: .horizontal)
+        addButton.setContentHuggingPriority(.required, for: .horizontal)
+        removeButton.setContentHuggingPriority(.required, for: .horizontal)
 
         photoButton.easy.layout(
             Left(16),
@@ -329,25 +345,31 @@ class CustomInputView: UIView {
         )
 
         previewButton.easy.layout(
-            Left(16).to(photoButton, .right),
+            Left(8).to(photoButton, .right),
             Top(>=8),
             Bottom(8)
         )
 
         stanpButton.easy.layout(
-            Left(16).to(previewButton, .right),
+            Left(8).to(previewButton, .right),
             Top(>=8),
             Bottom(8)
         )
 
         textView.easy.layout(
-            Left(16).to(stanpButton, .right),
+            Left(8).to(stanpButton, .right),
             Top(8),
             Bottom(8)
         )
         
-        sendButton.easy.layout(
-            Left(16).to(textView, .right),
+        addButton.easy.layout(
+            Left(8).to(textView, .right),
+            Top(>=8),
+            Bottom(8)
+        )
+
+        removeButton.easy.layout(
+            Left(8).to(addButton, .right),
             Right(16),
             Top(>=8),
             Bottom(8)
