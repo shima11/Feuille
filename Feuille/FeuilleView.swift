@@ -123,6 +123,8 @@ public class FeuilleView: TouchThroughView {
 
     middleView: do {
 
+      #warning("bottomview非表示時にconstraintがエラーになっている")
+      
       middleView.translatesAutoresizingMaskIntoConstraints = false
 
       bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
@@ -240,6 +242,7 @@ public class FeuilleView: TouchThroughView {
     if animated {
       self.endEditing(force)
     } else {
+      #warning("他のアニメーションが消える可能性がある")
       UIView.setAnimationsEnabled(false)
       self.endEditing(force)
       UIView.setAnimationsEnabled(true)
