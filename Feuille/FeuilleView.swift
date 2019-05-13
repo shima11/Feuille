@@ -60,13 +60,13 @@ public class FeuilleView: TouchThroughView {
 
   private let panRecognizer = UIPanGestureRecognizer()
 
-  private var keyboardFrame: CGRect
-  private let defaultKeyboardFrame: CGRect
-
-  private var oldFeuilleKeyboardHeight: CGFloat = 0
-
   private var interactiveState: InteractiveState = .completed
 
+  private var keyboardFrame: CGRect
+  private let defaultKeyboardFrame: CGRect
+  private var oldFeuilleKeyboardHeight: CGFloat = 0
+
+  
   // MARK: - Initializers
 
   public init() {
@@ -432,12 +432,20 @@ extension FeuilleView {
   
   @objc
   private func applicationDidFinishLaunching(_ note: Notification) {
-    // windowが生成されるタイミング
+    // windowが生成されるタイミングで設定
     UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
   }
   
   @objc
   private func keyboardWillShowNotification(_ note: Notification) {
+    
+    // SystemKeyboardを開くときはbottomViewを非表示にする
+    setConstraint(
+      bottomViewBottomConstraint,
+      value: bottomView.intrinsicContentSize.height,
+      animated: false
+    )
+
     delegate?.willShowKeybaord()
   }
   
@@ -459,57 +467,61 @@ extension FeuilleView {
   @objc
   private func keyboardWillChangeFrame(_ note: Notification) {
     
-    let result = calcurateKeyboardContext(note: note)
+    keyboardFrame = extractKeyboardFrame(note: note)
     
-    keyboardFrame = result.frame
-    
-    if keyboardFrame.maxY <= bounds.height {
+    // コメントアウトしているが、何かのためにこのタイミングで呼ぶ必要があったような気がする
+//    if keyboardFrame.maxY <= bounds.height {
       // keyboardが開くとき
-      delegate?.willShowKeybaord()
+//      delegate?.willShowKeybaord()
       // bottomViewを非表示にする
-       setConstraint(
-        bottomViewBottomConstraint,
-        value: bottomView.intrinsicContentSize.height,
-        animated: false
-      )
-    } else {
+//       setConstraint(
+//        bottomViewBottomConstraint,
+//        value: bottomView.intrinsicContentSize.height,
+//        animated: false
+//      )
+//    } else {
       // keyboardが閉じるとき
-      delegate?.willHideKeyboard()
-    }
+//      delegate?.willHideKeyboard()
+//    }
+    
+    // Keyboardの高さを変更（responderになって表示されるとき）
     
     setConstraint(
       keyboardHeight,
       value: UIScreen.main.bounds.height - keyboardFrame.minY,
       animated: true,
-      animationDuration: result.duration,
-      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
+      animationDuration: extractKeyboardAnimationDuration(note: note),
+      animationOptions: [extractKeyboardAnimationCurve(note: note), .beginFromCurrentState, .allowUserInteraction]
     )
     
   }
   
-  private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
+  // NotificationからFrame, duration, curveを抽出しているだけ
+  
+  private func extractKeyboardFrame(note: Notification) -> CGRect {
     
-    var newFrame: CGRect {
-      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
-      return rectValue?.cgRectValue ?? defaultKeyboardFrame
+    let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+    return rectValue?.cgRectValue ?? defaultKeyboardFrame
+  }
+  
+  private func extractKeyboardAnimationDuration(note: Notification) -> Double {
+    if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
+      return number.doubleValue
+    } else {
+      return 0.25
     }
-    
-    var animationDuration: Double {
-      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
-        return number.doubleValue
-      } else {
-        return 0.25
-      }
-    }
-    
-    var animationCurve: Int {
+  }
+  
+  private func extractKeyboardAnimationCurve(note: Notification) -> UIView.AnimationOptions {
+   
+    let animationCurve: Int = {
       if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
         return number.intValue
       }
       return UIView.AnimationCurve.easeInOut.rawValue
-    }
+    }()
     
-    return (newFrame, animationDuration, UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)))
+    return UIView.AnimationOptions(rawValue: UInt(animationCurve << 16))
   }
 
 }
