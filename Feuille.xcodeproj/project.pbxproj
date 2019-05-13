@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6856905210FC25D4D4411E2A /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC717035FD7E4E2E2BFD33E0 /* Pods_Demo.framework */; };
+		D4434C6722893B2E00A29109 /* ScrollAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4434C6622893B2E00A29109 /* ScrollAdapter.swift */; };
 		D4954CF2221E74D1007938DA /* Feuille.h in Headers */ = {isa = PBXBuildFile; fileRef = D4954CF0221E74D1007938DA /* Feuille.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D4954CFF221E74E9007938DA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4954CFE221E74E9007938DA /* AppDelegate.swift */; };
 		D4954D01221E74E9007938DA /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4954D00221E74E9007938DA /* ViewController.swift */; };
@@ -48,6 +49,7 @@
 /* Begin PBXFileReference section */
 		152275295A5FF0AC5470BBB8 /* Pods-Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.release.xcconfig"; path = "Target Support Files/Pods-Demo/Pods-Demo.release.xcconfig"; sourceTree = "<group>"; };
 		526246F0643A85ADDE91DF7E /* Pods-Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.debug.xcconfig"; path = "Target Support Files/Pods-Demo/Pods-Demo.debug.xcconfig"; sourceTree = "<group>"; };
+		D4434C6622893B2E00A29109 /* ScrollAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollAdapter.swift; sourceTree = "<group>"; };
 		D4954CED221E74D1007938DA /* Feuille.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Feuille.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4954CF0221E74D1007938DA /* Feuille.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Feuille.h; sourceTree = "<group>"; };
 		D4954CF1221E74D1007938DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				D4954D0E221E7824007938DA /* FeuilleView.swift */,
 				D4954D12221E80E5007938DA /* ContentView.swift */,
 				D4954D1C221EAC15007938DA /* TouchThroghView.swift */,
+				D4434C6622893B2E00A29109 /* ScrollAdapter.swift */,
 				D4954CF1221E74D1007938DA /* Info.plist */,
 			);
 			path = Feuille;
@@ -313,6 +316,7 @@
 			files = (
 				D4954D0F221E7824007938DA /* FeuilleView.swift in Sources */,
 				D4954D1D221EAC15007938DA /* TouchThroghView.swift in Sources */,
+				D4434C6722893B2E00A29109 /* ScrollAdapter.swift in Sources */,
 				D4954D13221E80E5007938DA /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

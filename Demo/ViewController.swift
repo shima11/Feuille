@@ -18,20 +18,21 @@ import Feuille
 class ViewController: UIViewController {
 
     let feuilleView = FeuilleView()
-
+    let scrollAdapter = ScrollAdaptor()
+    
     let customTextView = CustomInputView()
     let customTopView = CustomTopView()
 
     let photosView = PhotosView()
     let stanpView = StanpView()
-
+    
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     var height: NSLayoutConstraint!
 
     private let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     
-    var items: [Int] = (0...10).map { _ in Int.random(in: 0...100) }
+    var items: [Int] = (0...4).map { _ in Int.random(in: 0...100) }
 
     override func viewDidLoad() {
         
@@ -65,6 +66,7 @@ class ViewController: UIViewController {
 
         feuilleView.set(middleView: customTextView, animated: true)
 
+        scrollAdapter.setScrollView(collectionView)
     }
 
     @objc func didTapPhotoButton() {
@@ -207,13 +209,17 @@ extension ViewController: FeuilleViewDelegate {
             right: collectionView.scrollIndicatorInsets.right
         )
         
+        // 勝手にScrollしないように弾く（interactiveなKeyboardの移動中とintaractive transition中）
+        guard
+            case .completed = interactiveState,
+            transitionCoordinator?.isInteractive != true
+            else { return }
+
         #warning("キーボードの上昇分だけCollectionViewをスライドさせる")
-//        let currentContentOffset = collectionView.contentOffset
-//        let newContentOffset = CGPoint.init(x: currentContentOffset.x, y: currentContentOffset.y + keyboardHeight)
-//        collectionView.setContentOffset(newContentOffset, animated: true)
+        scrollAdapter.set(keyboardHeight: keyboardHeight)
 
     }
-
+    
 }
 
 // MARK: - CustomView
