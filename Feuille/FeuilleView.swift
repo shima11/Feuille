@@ -13,9 +13,20 @@ import Foundation
 #warning("はみ出しの考慮（高さと上部のマージンが衝突した場合など）")
 #warning("middleViewとsafeAreaのスペースの埋め方")
 #warning("端末の回転への対応")
+#warning("キーボードのインタラクションが始まるとScrollViewが固定される")
+
+
+class KeyboardObserver {
+
+  
+  
+}
+
 
 public protocol FeuilleViewDelegate: class {
 
+  // ここのKeyboardはSystemKeyboardとCustomKeyboardの両方を含む（現状の実装ではSystemだけになっている）
+  
   func willShowKeybaord()
   func didShowKeyboard()
   func willHideKeyboard()
@@ -352,6 +363,7 @@ public class FeuilleView: TouchThroughView {
 
   @objc
   private func applicationDidFinishLaunching(_ note: Notification) {
+    // windowが生成されるタイミング
     UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
   }
 
@@ -386,7 +398,11 @@ public class FeuilleView: TouchThroughView {
       // keyboardが開くとき
       delegate?.willShowKeybaord()
       // bottomViewを非表示にする
-      set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: false)
+      set(
+        constraint: bottomViewBottomConstraint,
+        value: bottomView.intrinsicContentSize.height,
+        animated: false
+      )
     } else {
       // keyboardが閉じるとき
       delegate?.willHideKeyboard()
@@ -455,7 +471,10 @@ public class FeuilleView: TouchThroughView {
 
         if length > 0 {
           set(constraint: bottomViewBottomConstraint, value: length, animated: false)
-          delegate?.didChangeHeight(keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length, interactiveState: interactiveState)
+          delegate?.didChangeHeight(
+            keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length,
+            interactiveState: interactiveState
+          )
         }
 
       case .ended, .cancelled, .failed:
