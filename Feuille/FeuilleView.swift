@@ -10,7 +10,7 @@ import Foundation
 
 #warning("bottomView → keyboard animation without animation")
 #warning("アニメーション中のmiddleviewとkeyboardの隙間→animationの計算がんばる")
-#warning("はみ出しの考慮（高さと上部のマージンが衝突した場合など）")
+#warning("はみ出しの考慮（各Viewの合計が画面高さを超えたとき、上部のマージンとの兼ね合い）")
 #warning("middleViewとsafeAreaのスペースの埋め方")
 #warning("端末の回転への対応")
 #warning("キーボードのインタラクションが始まるとScrollViewが固定される")
@@ -116,7 +116,7 @@ public class FeuilleView: TouchThroughView {
 
       NSLayoutConstraint.activate([
         topViewHeight,
-        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 0),
+        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 48),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
         topView.leftAnchor.constraint(equalTo: leftAnchor),
         topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
@@ -126,8 +126,6 @@ public class FeuilleView: TouchThroughView {
 
     middleView: do {
 
-      #warning("bottomview非表示時にconstraintがエラーになっている")
-      
       middleView.translatesAutoresizingMaskIntoConstraints = false
 
       bottomMiddleToKeyboardConstraint = middleView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
@@ -294,7 +292,7 @@ public class FeuilleView: TouchThroughView {
         withDuration: animationDuration,
         delay: 0,
         options: animationOptions,
-        animations: { self.layoutIfNeeded()},
+        animations: { self.layoutIfNeeded() },
         completion: nil
       )
 

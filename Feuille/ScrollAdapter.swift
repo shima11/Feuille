@@ -124,8 +124,6 @@ public class ScrollAdaptor {
     public func scrollToBottom(animated: Bool, keyboardHeight: CGFloat) {
         #warning("extensionでUICollectionViewとかで分けるか...それに伴ってジェネリクスで書くか")
         
-        #warning("たぶんここの計算がおかしい")
-        
         guard let scrollView = scrollView else { return }
         
         let point = CGPoint.init(

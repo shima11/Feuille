@@ -12,9 +12,6 @@ import EasyPeasy
 
 import Feuille
 
-#warning("ScrollViewのスクロール対応をFeuilleとは分けて実装（キーボード表示時、Cellの追加時、ContentViewの下部時の対応）")
-#warning("BottomViewをタップしてもBottomViewが閉じてしまう問題")
-
 class ViewController: UIViewController {
 
     let feuilleView = FeuilleView()
@@ -22,13 +19,10 @@ class ViewController: UIViewController {
     
     let customTextView = CustomInputView()
     let customTopView = CustomTopView()
-
     let photosView = PhotosView()
     let stanpView = StanpView()
     
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-
-    var height: NSLayoutConstraint!
 
     private let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     
@@ -41,34 +35,46 @@ class ViewController: UIViewController {
         view.addSubview(collectionView)
         view.addSubview(feuilleView)
 
-        collectionView.delegate = self
-        collectionView.dataSource = self
+        ui: do {
+            
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            
+            collectionView.alwaysBounceVertical = true
+            collectionView.backgroundColor = .white
+            collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: UICollectionViewCell.self))
+            collectionView.keyboardDismissMode = .interactive
+            
+            customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
+            customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
+            customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
+            customTextView.addButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
+            customTextView.removeButton.addTarget(self, action: #selector(didTapRemoveButton), for: .touchUpInside)
+            
+            photosView.backgroundColor = .darkGray
+            stanpView.backgroundColor = .orange
+            
+        }
         
-        collectionView.alwaysBounceVertical = true
-        collectionView.backgroundColor = .white
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: UICollectionViewCell.self))
-        collectionView.keyboardDismissMode = .interactive
+        prepare: do {
+            
+            scrollAdapter.setScrollView(collectionView)
 
-        feuilleView.delegate = self
-
-        customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
-        customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
-        customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
-        customTextView.addButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
-        customTextView.removeButton.addTarget(self, action: #selector(didTapRemoveButton), for: .touchUpInside)
-
-        photosView.backgroundColor = .darkGray
-        stanpView.backgroundColor = .orange
-
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
-        view.addGestureRecognizer(gesture)
-
-        collectionView.easy.layout(Edges())
-        feuilleView.easy.layout(Edges())
-
-        feuilleView.set(middleView: customTextView, animated: true)
-
-        scrollAdapter.setScrollView(collectionView)
+            let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapView))
+            collectionView.addGestureRecognizer(gesture)
+            
+            feuilleView.delegate = self
+            feuilleView.set(middleView: customTextView, animated: true)
+            
+        }
+        
+        layout: do {
+            
+            collectionView.easy.layout(Edges())
+            feuilleView.easy.layout(Edges())
+            
+        }
+        
     }
 
     @objc func didTapPhotoButton() {
@@ -96,6 +102,7 @@ class ViewController: UIViewController {
         items.append(Int.random(in: 0...100))
         
         let indexPath = IndexPath.init(row: items.count - 1, section: 0)
+        
         collectionView.insertItems(at: [indexPath])
         collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
@@ -107,11 +114,40 @@ class ViewController: UIViewController {
         items.removeLast()
 
         let indexPath = IndexPath.init(row: items.count - 1, section: 0)
+        
         collectionView.deleteItems(at: [indexPath])
         collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
 }
+
+// MARK: - FeuilleViewDelegate
+
+extension ViewController: FeuilleViewDelegate {
+    
+    func willShowKeybaord() { }
+    
+    func didShowKeyboard() { }
+    
+    func willHideKeyboard() { }
+    
+    func didHideKeyboard() { }
+    
+    func didChangeHeight(keyboardHeight: CGFloat, interactiveState: FeuilleView.InteractiveState) {
+        
+        print("height:", keyboardHeight)
+        
+        // 勝手にScrollしないように弾く（interactiveなKeyboardの移動中とintaractive transition中）
+        guard
+            case .completed = interactiveState,
+            transitionCoordinator?.isInteractive != true
+            else { return }
+        
+        scrollAdapter.scrollIfNeeded(keyboardHeight: keyboardHeight)
+    }
+    
+}
+
 
 // MARK: - UICollectionViewDataSource
 
@@ -165,70 +201,14 @@ extension ViewController: UICollectionViewDelegate {
 extension ViewController: UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
         return CGSize(width: collectionView.bounds.width, height: 60)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
         return insets
     }
-}
-
-// MARK: - FeuilleViewDelegate
-
-extension ViewController: FeuilleViewDelegate {
-
-    func willShowKeybaord() {
-
-    }
-
-    func didShowKeyboard() {
-
-    }
-
-    func willHideKeyboard() {
-
-    }
-
-    func didHideKeyboard() {
-
-    }
-
-    func didChangeHeight(keyboardHeight: CGFloat, interactiveState: FeuilleView.InteractiveState) {
-
-        print("height:", keyboardHeight)
-
-        let safeAreaBottomInset: CGFloat
-        if #available(iOS 11.0, *) {
-            safeAreaBottomInset  = view.safeAreaInsets.bottom
-        } else {
-            safeAreaBottomInset = bottomLayoutGuide.length
-        }
-
-        collectionView.contentInset = .init(
-            top: collectionView.contentInset.top,
-            left: collectionView.contentInset.left,
-            bottom: insets.bottom + keyboardHeight - safeAreaBottomInset,
-            right: collectionView.contentInset.right
-        )
-
-        collectionView.scrollIndicatorInsets = .init(
-            top: collectionView.scrollIndicatorInsets.top,
-            left: collectionView.scrollIndicatorInsets.left,
-            bottom: insets.bottom + keyboardHeight - safeAreaBottomInset,
-            right: collectionView.scrollIndicatorInsets.right
-        )
-        
-        // 勝手にScrollしないように弾く（interactiveなKeyboardの移動中とintaractive transition中）
-        guard
-            case .completed = interactiveState,
-            transitionCoordinator?.isInteractive != true
-            else { return }
-
-        #warning("キーボードの上昇分だけCollectionViewをスライドさせる")
-        scrollAdapter.scrollIfNeeded(keyboardHeight: keyboardHeight)
-
-    }
-    
 }
 
 // MARK: - CustomView
@@ -311,13 +291,18 @@ class CustomInputView: UIView {
     init() {
         super.init(frame: .zero)
 
-        addSubview(photoButton)
-        addSubview(previewButton)
-        addSubview(stanpButton)
-        addSubview(textView)
-        addSubview(addButton)
-        addSubview(removeButton)
-
+        let stackView = UIStackView(
+            arrangedSubviews: [
+                photoButton,
+                stanpButton,
+                previewButton,
+                textView,
+                addButton,
+                removeButton,
+            ]
+        )
+        addSubview(stackView)
+        
         backgroundColor = .white
 
         textView.backgroundColor = UIColor.groupTableViewBackground
@@ -326,9 +311,9 @@ class CustomInputView: UIView {
         textView.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         textView.layer.cornerRadius = textView.intrinsicContentSize.height / 2
 
-        photoButton.setTitle("Photo", for: .normal)
-        previewButton.setTitle("Top", for: .normal)
-        stanpButton.setTitle("Stamp", for: .normal)
+        photoButton.setTitle("A", for: .normal)
+        stanpButton.setTitle("B", for: .normal)
+        previewButton.setTitle("C", for: .normal)
         addButton.setTitle("+", for: .normal)
         removeButton.setTitle("-", for: .normal)
 
@@ -338,40 +323,10 @@ class CustomInputView: UIView {
         addButton.setContentHuggingPriority(.required, for: .horizontal)
         removeButton.setContentHuggingPriority(.required, for: .horizontal)
 
-        photoButton.easy.layout(
+        stackView.easy.layout(
             Left(16),
-            Top(>=8),
-            Bottom(8)
-        )
-
-        previewButton.easy.layout(
-            Left(8).to(photoButton, .right),
-            Top(>=8),
-            Bottom(8)
-        )
-
-        stanpButton.easy.layout(
-            Left(8).to(previewButton, .right),
-            Top(>=8),
-            Bottom(8)
-        )
-
-        textView.easy.layout(
-            Left(8).to(stanpButton, .right),
-            Top(8),
-            Bottom(8)
-        )
-        
-        addButton.easy.layout(
-            Left(8).to(textView, .right),
-            Top(>=8),
-            Bottom(8)
-        )
-
-        removeButton.easy.layout(
-            Left(8).to(addButton, .right),
             Right(16),
-            Top(>=8),
+            Top(8),
             Bottom(8)
         )
     }
