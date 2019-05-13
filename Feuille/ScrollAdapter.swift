@@ -15,7 +15,6 @@ public class ScrollAdaptor {
     private var oldKeyboardHeight: CGFloat = 0
     private var contentOffsetWhenBeginDragging: CGFloat = 0 // スクロール時のOffsetを保持してMessengerみたいな挙動を確認
     
-    
     public init() {
         
     }

@@ -43,7 +43,8 @@ class ViewController: UIViewController {
 
         collectionView.delegate = self
         collectionView.dataSource = self
-
+        
+        collectionView.alwaysBounceVertical = true
         collectionView.backgroundColor = .white
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: UICollectionViewCell.self))
         collectionView.keyboardDismissMode = .interactive
@@ -70,17 +71,14 @@ class ViewController: UIViewController {
     }
 
     @objc func didTapPhotoButton() {
-
         feuilleView.set(bottomView: photosView, animated: true)
     }
 
     @objc func didTapPreviewButton() {
-
         feuilleView.set(topView: customTopView, animated: true, isIncludedTopViewHeight: true)
     }
 
     @objc func didTapStanpButton() {
-
         feuilleView.set(bottomView: stanpView, animated: true)
     }
 
@@ -89,7 +87,6 @@ class ViewController: UIViewController {
         #warning("BottomViewをタップしたときも呼ばれてしまう")
         
         feuilleView.endEditing(true)
-
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
     
@@ -190,7 +187,7 @@ extension ViewController: FeuilleViewDelegate {
 
         let safeAreaBottomInset: CGFloat
         if #available(iOS 11.0, *) {
-           safeAreaBottomInset  = view.safeAreaInsets.bottom
+            safeAreaBottomInset  = view.safeAreaInsets.bottom
         } else {
             safeAreaBottomInset = bottomLayoutGuide.length
         }
