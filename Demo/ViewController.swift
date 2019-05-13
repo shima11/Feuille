@@ -32,7 +32,7 @@ class ViewController: UIViewController {
 
     private let insets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     
-    var items: [Int] = (0...4).map { _ in Int.random(in: 0...100) }
+    var items: [Int] = (0...1).map { _ in Int.random(in: 0...100) }
 
     override func viewDidLoad() {
         
@@ -213,7 +213,7 @@ extension ViewController: FeuilleViewDelegate {
             else { return }
 
         #warning("キーボードの上昇分だけCollectionViewをスライドさせる")
-        scrollAdapter.set(keyboardHeight: keyboardHeight)
+        scrollAdapter.scrollIfNeeded(keyboardHeight: keyboardHeight)
 
     }
     

@@ -23,7 +23,7 @@ public class ScrollAdaptor {
         scrollView = view
     }
     
-    public func set(keyboardHeight: CGFloat) {
+    public func scrollIfNeeded(keyboardHeight: CGFloat) {
         
         guard let scrollView = scrollView else { return }
         
@@ -32,37 +32,32 @@ public class ScrollAdaptor {
         }
         
         let contentHeight: CGFloat
+        #warning("insetの加算は必要？")
         if #available(iOS 11.0, *) {
             contentHeight = scrollView.contentSize.height + scrollView.safeAreaInsets.top
         } else {
             contentHeight = scrollView.contentSize.height + scrollView.layoutMargins.bottom
         }
-        
-        let diffOfContentHeightToCollectionHeight = contentHeight - scrollView.bounds.height
-        
-        if diffOfContentHeightToCollectionHeight < 0 {
-            // contentSizeがbounds.heightよりも小さい場合 → Keybaord表示後BottomまでScrollしているので、元に戻す
-            scrollView.contentInset.bottom = 0
-            scrollView.scrollIndicatorInsets.bottom = 0
+
+        guard contentHeight + keyboardHeight > scrollView.bounds.height else {
+            setContentInset(bottom: 0)
             scrollToTop(animated: true)
+           return
         }
-        
-        // Keyboardを開いてもContentが重ならないはScrollする必要がないので弾く
-        guard diffOfContentHeightToCollectionHeight + keyboardHeight > 0 else { return }
-        
-        let _offset = scrollView.contentOffset.y
+
+        let _offsetY = scrollView.contentOffset.y
         
         // Keyboardのheight分だけinsetを調整
         setContentInsetIfNeeded(keyboardHeight: keyboardHeight)
         
-        // contentSizeがcollectionView.heightよりも小さい場合はKeyboard表示後BottomまでScroll
-        if diffOfContentHeightToCollectionHeight < 0 {
-            scrollToBottom(animated: false)
+        if contentHeight < scrollView.bounds.height {
+            // contentSizeがcollectionView.heightよりも小さい場合はKeyboard表示後BottomまでScroll
+            scrollToBottom(animated: false, keyboardHeight: keyboardHeight)
         }
         else {
+            // そうじゃないときはキーボード分だけ自動スクロール
             // insetを変更するとoffsetが変更する場合の対応
-            let diffOffset = _offset - scrollView.contentOffset.y
-            
+            let diffOffset = _offsetY - scrollView.contentOffset.y
             let offsetY = keyboardHeight - oldKeyboardHeight
             let newOffsetY = max((scrollView.contentOffset.y + offsetY + diffOffset), 0)
             
@@ -70,16 +65,17 @@ public class ScrollAdaptor {
                 .init(x: scrollView.contentOffset.x, y: newOffsetY),
                 animated: false
             )
+            // Option
             // Keybaord表示時にBottom付近までScrollされていたらKeyboardを閉じた後もBottomに合わせるようにする(Messenger)
-            if scrollView.isDragging &&
-                contentOffsetWhenBeginDragging >= diffOfContentHeightToCollectionHeight {
-                // DispatchQueue.main.asyncで囲んでいるのはScrollの慣性を止めるため
-                DispatchQueue.main.async {
-                    UIView.animate(withDuration: 0.3, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState], animations: {
-                        self.scrollToBottom(animated: false)
-                    }, completion: nil)
-                }
-            }
+//            if scrollView.isDragging &&
+//                contentOffsetWhenBeginDragging >= diffOfContentHeightToCollectionHeight {
+//                // DispatchQueue.main.asyncで囲んでいるのはScrollの慣性を止めるため
+//                DispatchQueue.main.async {
+//                    UIView.animate(withDuration: 0.3, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState], animations: {
+//                        self.scrollToBottom(animated: false, keyboardHeight: keyboardHeight)
+//                    }, completion: nil)
+//                }
+//            }
         }
     }
     
@@ -89,23 +85,29 @@ public class ScrollAdaptor {
         guard
             let scrollView = scrollView,
             keyboardHeight > scrollView.bounds.height - scrollView.contentSize.height
-            else { return }
+            else {
+                // keyboardが表示されてもスクロールする必要がない場合（十分なスペースがある場合）
+                return
+        }
         
         // Keyboardのheight分だけinsetを調整
         
-        let margin: CGFloat = 4.0
-        
         let _insetBottom: CGFloat
-        
         if #available(iOS 11, *) {
-            _insetBottom = max(keyboardHeight - scrollView.safeAreaInsets.bottom, 0) + margin
+            _insetBottom = max(keyboardHeight - scrollView.safeAreaInsets.bottom, 0)
         } else {
-            _insetBottom = max(keyboardHeight, 0) + margin
+            _insetBottom = max(keyboardHeight, 0)
         }
+
+        setContentInset(bottom: _insetBottom)
+    }
+    
+    private func setContentInset(bottom: CGFloat) {
         
-        scrollView.contentInset.bottom = _insetBottom
-        scrollView.scrollIndicatorInsets.bottom = _insetBottom
+        guard let scrollView = scrollView else { return }
         
+        scrollView.contentInset.bottom = bottom
+        scrollView.scrollIndicatorInsets.bottom = bottom
     }
     
     public func scrollToTop(animated: Bool) {
@@ -119,12 +121,17 @@ public class ScrollAdaptor {
         scrollView.setContentOffset(.zero, animated: animated)
     }
     
-    public func scrollToBottom(animated: Bool) {
+    public func scrollToBottom(animated: Bool, keyboardHeight: CGFloat) {
         #warning("extensionでUICollectionViewとかで分けるか...それに伴ってジェネリクスで書くか")
+        
+        #warning("たぶんここの計算がおかしい")
         
         guard let scrollView = scrollView else { return }
         
-        let point = CGPoint.init(x: scrollView.contentOffset.x, y: scrollView.contentOffset.y - scrollView.bounds.height)
+        let point = CGPoint.init(
+            x: scrollView.contentOffset.x,
+            y: scrollView.contentSize.height - scrollView.bounds.height + keyboardHeight
+        )
         scrollView.setContentOffset(point, animated: animated)
     }
     
