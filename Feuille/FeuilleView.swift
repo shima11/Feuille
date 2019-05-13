@@ -82,15 +82,19 @@ public class FeuilleView: TouchThroughView {
 
     super.init(frame: .zero)
 
-    panRecognizer.delegate = self
-    panRecognizer.addTarget(self, action: #selector(panGesture(_:)))
-    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
-
     addSubview(topView)
     addSubview(middleView)
     addSubview(bottomView)
 
-    startObserveKeyboard()
+    prepare: do {
+      
+      panRecognizer.delegate = self
+      panRecognizer.addTarget(self, action: #selector(panGesture(_:)))
+      UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
+      
+      startObserveKeyboard()
+      
+    }
 
     keyboardLayout: do {
 
@@ -305,6 +309,8 @@ public class FeuilleView: TouchThroughView {
   @objc
   private func panGesture(_ recognizer: UIPanGestureRecognizer) {
 
+    // ドラッグした場合の 1.Constraintsの更新と 2.Delegateメソッドの呼び出し
+    
     switch recognizer.state {
     case .changed:
       self.interactiveState = .changed
@@ -315,7 +321,9 @@ public class FeuilleView: TouchThroughView {
     }
 
     if bottomViewHeight.constant > 0 && bottomViewBottomConstraint.constant < bottomViewHeight.constant {
+      
       // BottomViewが表示されている場合
+      
       switch recognizer.state {
       case .changed:
 
@@ -529,6 +537,8 @@ extension FeuilleView {
 
 extension FeuilleView: UIGestureRecognizerDelegate {
 
+  // TODO: これ何してるんだっけ？
+  
   public func gestureRecognizer(
     _ gestureRecognizer: UIGestureRecognizer,
     shouldReceive touch: UITouch
