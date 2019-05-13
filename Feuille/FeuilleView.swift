@@ -15,14 +15,6 @@ import Foundation
 #warning("端末の回転への対応")
 #warning("キーボードのインタラクションが始まるとScrollViewが固定される")
 
-
-class KeyboardObserver {
-
-  
-  
-}
-
-
 public protocol FeuilleViewDelegate: class {
 
   // ここのKeyboardはSystemKeyboardとCustomKeyboardの両方を含む（現状の実装ではSystemだけになっている）
@@ -53,7 +45,7 @@ public class FeuilleView: TouchThroughView {
   public let bottomView = ContentView()
 
   public weak var delegate: FeuilleViewDelegate?
-
+  
   private let keyboardLayoutGuide: UILayoutGuide = .init()
   private var keyboardHeight: NSLayoutConstraint!
 
@@ -192,7 +184,7 @@ public class FeuilleView: TouchThroughView {
 
     topView.set(bodyView: view)
 
-    set(constraint: topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+    setConstraint(topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
   }
 
@@ -228,11 +220,11 @@ public class FeuilleView: TouchThroughView {
     if keyboardHeight.constant > 0 {
       // If there is a keyboard, no animation.
       dismissKeyboard(animated: false, force: true)
-      set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: false)
-      set(constraint: bottomViewBottomConstraint, value: 0, animated: false)
+      setConstraint(bottomViewHeight, value: view.intrinsicContentSize.height, animated: false)
+      setConstraint(bottomViewBottomConstraint, value: 0, animated: false)
     } else {
-      set(constraint: bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
-      set(constraint: bottomViewBottomConstraint, value: 0, animated: animated)
+      setConstraint(bottomViewHeight, value: view.intrinsicContentSize.height, animated: animated)
+      setConstraint(bottomViewBottomConstraint, value: 0, animated: animated)
     }
 
   }
@@ -240,10 +232,10 @@ public class FeuilleView: TouchThroughView {
   public func dismiss(types: [ItemType], animated: Bool) {
 
     if types.contains(.top) {
-      set(constraint: topViewHeight, value: 0, animated: animated)
+      setConstraint(topViewHeight, value: 0, animated: animated)
     }
     if types.contains(.bottom) {
-      set(constraint: bottomViewBottomConstraint, value: bottomView.frame.height, animated: animated)
+      setConstraint(bottomViewBottomConstraint, value: bottomView.frame.height, animated: animated)
     }
 
   }
@@ -286,8 +278,8 @@ public class FeuilleView: TouchThroughView {
     return bounds.height - middleView.frame.minY
   }
 
-  private func set(
-    constraint: NSLayoutConstraint,
+  private func setConstraint(
+    _ constraint: NSLayoutConstraint,
     value: CGFloat,
     animated: Bool,
     animationDuration: TimeInterval = 0.25,
@@ -302,145 +294,14 @@ public class FeuilleView: TouchThroughView {
         withDuration: animationDuration,
         delay: 0,
         options: animationOptions,
-        animations: {
-          self.layoutIfNeeded()
-      },
+        animations: { self.layoutIfNeeded()},
         completion: nil
       )
 
     } else {
-
       constraint.constant = value
     }
 
-  }
-
-  private func startObserveKeyboard() {
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(keyboardWillShowNotification(_:)),
-      name: UIResponder.keyboardWillShowNotification,
-      object: nil
-    )
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(keyboardDidShowNotification(_:)),
-      name: UIResponder.keyboardDidShowNotification,
-      object: nil
-    )
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(keyboardWillHideNotification(_:)),
-      name: UIResponder.keyboardWillHideNotification,
-      object: nil
-    )
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(keyboardDidHideNotification(_:)),
-      name: UIResponder.keyboardDidHideNotification,
-      object: nil
-    )
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(keyboardWillChangeFrame(_:)),
-      name: UIResponder.keyboardWillChangeFrameNotification,
-      object: nil
-    )
-
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(applicationDidFinishLaunching(_:)),
-      name: UIApplication.didFinishLaunchingNotification,
-      object: nil
-    )
-
-  }
-
-  @objc
-  private func applicationDidFinishLaunching(_ note: Notification) {
-    // windowが生成されるタイミング
-    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
-  }
-
-  @objc
-  private func keyboardWillShowNotification(_ note: Notification) {
-    delegate?.willShowKeybaord()
-  }
-
-  @objc
-  private func keyboardDidShowNotification(_ note: Notification) {
-    delegate?.didShowKeyboard()
-  }
-
-  @objc
-  private func keyboardWillHideNotification(_ note: Notification) {
-    delegate?.willHideKeyboard()
-  }
-
-  @objc
-  private func keyboardDidHideNotification(_ note: Notification) {
-    delegate?.didHideKeyboard()
-  }
-
-  @objc
-  private func keyboardWillChangeFrame(_ note: Notification) {
-
-    let result = calcurateKeyboardContext(note: note)
-
-    keyboardFrame = result.frame
-
-    if keyboardFrame.maxY <= bounds.height {
-      // keyboardが開くとき
-      delegate?.willShowKeybaord()
-      // bottomViewを非表示にする
-      set(
-        constraint: bottomViewBottomConstraint,
-        value: bottomView.intrinsicContentSize.height,
-        animated: false
-      )
-    } else {
-      // keyboardが閉じるとき
-      delegate?.willHideKeyboard()
-    }
-
-    set(
-      constraint: keyboardHeight,
-      value: UIScreen.main.bounds.height - keyboardFrame.minY,
-      animated: true,
-      animationDuration: result.duration,
-      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
-    )
-
-  }
-
-  private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
-
-    var newFrame: CGRect {
-      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
-      return rectValue?.cgRectValue ?? defaultKeyboardFrame
-    }
-
-    var animationDuration: Double {
-      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
-        return number.doubleValue
-      } else {
-        return 0.25
-      }
-    }
-
-    var animationCurve: Int {
-      if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
-        return number.intValue
-      }
-      return UIView.AnimationCurve.easeInOut.rawValue
-    }
-
-    return (newFrame, animationDuration, UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)))
   }
 
   @objc
@@ -470,7 +331,7 @@ public class FeuilleView: TouchThroughView {
         let length = origin.y - threthold
 
         if length > 0 {
-          set(constraint: bottomViewBottomConstraint, value: length, animated: false)
+          setConstraint(bottomViewBottomConstraint, value: length, animated: false)
           delegate?.didChangeHeight(
             keyboardHeight: feuilleKeyboardHeight(isIncludedTopViewHeight: isIncludedTopViewHeight) - length,
             interactiveState: interactiveState
@@ -482,11 +343,11 @@ public class FeuilleView: TouchThroughView {
         #warning("scrollのvelocityも考慮してanimationする")
         if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
           delegate?.willHideKeyboard()
-          set(constraint: bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
+          setConstraint(bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
         }
         else {
-          set(constraint: bottomViewBottomConstraint, value: 0, animated: true)
-          set(constraint: bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
+          setConstraint(bottomViewBottomConstraint, value: 0, animated: true)
+          setConstraint(bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
         }
 
       default:
@@ -511,12 +372,148 @@ public class FeuilleView: TouchThroughView {
 
       let _keyboardHeight = UIScreen.main.bounds.height - keyboardFrame.minY
 
-      set(constraint: keyboardHeight, value: _keyboardHeight, animated: false)
+      setConstraint(keyboardHeight, value: _keyboardHeight, animated: false)
 
     }
   }
 
 }
+
+
+// MARK: - Observing
+
+extension FeuilleView {
+  
+  private func startObserveKeyboard() {
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillShowNotification(_:)),
+      name: UIResponder.keyboardWillShowNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardDidShowNotification(_:)),
+      name: UIResponder.keyboardDidShowNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillHideNotification(_:)),
+      name: UIResponder.keyboardWillHideNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardDidHideNotification(_:)),
+      name: UIResponder.keyboardDidHideNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(keyboardWillChangeFrame(_:)),
+      name: UIResponder.keyboardWillChangeFrameNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationDidFinishLaunching(_:)),
+      name: UIApplication.didFinishLaunchingNotification,
+      object: nil
+    )
+    
+  }
+  
+  @objc
+  private func applicationDidFinishLaunching(_ note: Notification) {
+    // windowが生成されるタイミング
+    UIApplication.shared.windows.first?.addGestureRecognizer(self.panRecognizer)
+  }
+  
+  @objc
+  private func keyboardWillShowNotification(_ note: Notification) {
+    delegate?.willShowKeybaord()
+  }
+  
+  @objc
+  private func keyboardDidShowNotification(_ note: Notification) {
+    delegate?.didShowKeyboard()
+  }
+  
+  @objc
+  private func keyboardWillHideNotification(_ note: Notification) {
+    delegate?.willHideKeyboard()
+  }
+  
+  @objc
+  private func keyboardDidHideNotification(_ note: Notification) {
+    delegate?.didHideKeyboard()
+  }
+  
+  @objc
+  private func keyboardWillChangeFrame(_ note: Notification) {
+    
+    let result = calcurateKeyboardContext(note: note)
+    
+    keyboardFrame = result.frame
+    
+    if keyboardFrame.maxY <= bounds.height {
+      // keyboardが開くとき
+      delegate?.willShowKeybaord()
+      // bottomViewを非表示にする
+       setConstraint(
+        bottomViewBottomConstraint,
+        value: bottomView.intrinsicContentSize.height,
+        animated: false
+      )
+    } else {
+      // keyboardが閉じるとき
+      delegate?.willHideKeyboard()
+    }
+    
+    setConstraint(
+      keyboardHeight,
+      value: UIScreen.main.bounds.height - keyboardFrame.minY,
+      animated: true,
+      animationDuration: result.duration,
+      animationOptions: [result.curve, .beginFromCurrentState, .allowUserInteraction]
+    )
+    
+  }
+  
+  private func calcurateKeyboardContext(note: Notification) -> (frame: CGRect, duration: Double, curve: UIView.AnimationOptions) {
+    
+    var newFrame: CGRect {
+      let rectValue = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+      return rectValue?.cgRectValue ?? defaultKeyboardFrame
+    }
+    
+    var animationDuration: Double {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber {
+        return number.doubleValue
+      } else {
+        return 0.25
+      }
+    }
+    
+    var animationCurve: Int {
+      if let number = note.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber {
+        return number.intValue
+      }
+      return UIView.AnimationCurve.easeInOut.rawValue
+    }
+    
+    return (newFrame, animationDuration, UIView.AnimationOptions(rawValue: UInt(animationCurve << 16)))
+  }
+
+}
+
 
 // MARK: - UIGestureRecognizerDelegate
 
