@@ -9,11 +9,11 @@
 import Foundation
 
 #warning("bottomView → keyboard animation without animation")
-#warning("アニメーション中のmiddleviewとkeyboardの隙間→animationの計算がんばる")
 #warning("はみ出しの考慮（各Viewの合計が画面高さを超えたとき、上部のマージンとの兼ね合い）")
 #warning("middleViewとsafeAreaのスペースの埋め方")
 #warning("端末の回転への対応")
 #warning("キーボードのインタラクションが始まるとScrollViewが固定される")
+#warning("topviewが表示されたときも意図せずCollectionViewがスクロールする")
 
 public protocol FeuilleViewDelegate: class {
 
@@ -186,6 +186,8 @@ public class FeuilleView: TouchThroughView {
 
     topView.set(bodyView: view)
 
+    #warning("view.intrinsicContentSize.heightを設定しているのはbadかもしれない。intrinsicContentSizeが決まらない場合もありえそう。")
+    
     setConstraint(topViewHeight, value: view.intrinsicContentSize.height, animated: animated)
 
   }
@@ -218,6 +220,8 @@ public class FeuilleView: TouchThroughView {
   public func set(bottomView view: UIView, animated: Bool) {
 
     bottomView.set(bodyView: view)
+
+    #warning("view.intrinsicContentSize.heightを設定しているのはbadかもしれない。intrinsicContentSizeが決まらない場合もありえそう。")
 
     if keyboardHeight.constant > 0 {
       // If there is a keyboard, no animation.
@@ -333,7 +337,7 @@ public class FeuilleView: TouchThroughView {
           else { return }
 
         let origin = recognizer.location(in: window)
-        let threthold = bounds.height - bottomView.intrinsicContentSize.height
+        let threthold = bounds.height - bottomView.bounds.height
         let length = origin.y - threthold
 
         if length > 0 {
@@ -346,14 +350,13 @@ public class FeuilleView: TouchThroughView {
 
       case .ended, .cancelled, .failed:
 
-        #warning("scrollのvelocityも考慮してanimationする")
-        if bottomViewBottomConstraint.constant > bottomView.intrinsicContentSize.height * 0.5 {
+        if bottomViewBottomConstraint.constant > bottomView.bounds.height * 0.5 {
           delegate?.willHideKeyboard()
-          setConstraint(bottomViewBottomConstraint, value: bottomView.intrinsicContentSize.height, animated: true)
+          setConstraint(bottomViewBottomConstraint, value: bottomView.bounds.height, animated: true)
         }
         else {
           setConstraint(bottomViewBottomConstraint, value: 0, animated: true)
-          setConstraint(bottomViewHeight, value: bottomView.intrinsicContentSize.height, animated: true)
+          setConstraint(bottomViewHeight, value: bottomView.bounds.height, animated: true)
         }
 
       default:

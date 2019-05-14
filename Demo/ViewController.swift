@@ -45,6 +45,7 @@ class ViewController: UIViewController {
             collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: UICollectionViewCell.self))
             collectionView.keyboardDismissMode = .interactive
             
+            customTextView.backgroundColor = .lightGray
             customTextView.photoButton.addTarget(self, action: #selector(didTapPhotoButton), for: .touchUpInside)
             customTextView.previewButton.addTarget(self, action: #selector(didTapPreviewButton), for: .touchUpInside)
             customTextView.stanpButton.addTarget(self, action: #selector(didTapStanpButton), for: .touchUpInside)
@@ -90,9 +91,6 @@ class ViewController: UIViewController {
     }
 
     @objc func didTapView() {
-
-        #warning("BottomViewをタップしたときも呼ばれてしまう")
-        
         feuilleView.endEditing(true)
         feuilleView.dismiss(types: [.top, .bottom], animated: true)
     }
@@ -104,7 +102,7 @@ class ViewController: UIViewController {
         let indexPath = IndexPath.init(row: items.count - 1, section: 0)
         
         collectionView.insertItems(at: [indexPath])
-        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
 
     @objc func didTapRemoveButton() {
@@ -116,7 +114,7 @@ class ViewController: UIViewController {
         let indexPath = IndexPath.init(row: items.count - 1, section: 0)
         
         collectionView.deleteItems(at: [indexPath])
-        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
 }
