@@ -63,7 +63,7 @@ public class FeuilleView: TouchThroughView {
   private let defaultKeyboardFrame: CGRect
   private var oldFeuilleKeyboardHeight: CGFloat = 0
 
-  // TODO: topViewをキーボードの高さとして計算するのか（外部から設定できるようにはしたい）
+  // キーボードの高さとしてTopViewを含めるかどうか
   private var isIncludedTopViewHeight: Bool = false
 
   // TODO: 各Viewの合計が画面高さを超えたとき、上部のマージンとの兼ね合い(外部から設定できるようにはしたい)

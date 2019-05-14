@@ -83,7 +83,7 @@ class ViewController: UIViewController {
     }
 
     @objc func didTapPreviewButton() {
-        feuilleView.set(topView: customTopView, animated: true, isIncludedTopViewHeight: true)
+        feuilleView.set(topView: customTopView, animated: true, isIncludedTopViewHeight: false)
     }
 
     @objc func didTapStanpButton() {
