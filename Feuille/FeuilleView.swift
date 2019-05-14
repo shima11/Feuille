@@ -8,11 +8,10 @@
 
 import Foundation
 
-#warning("bottomView → keyboard animation without animation")
-#warning("はみ出しの考慮（各Viewの合計が画面高さを超えたとき、上部のマージンとの兼ね合い）")
-#warning("middleViewとsafeAreaのスペースの埋め方")
-#warning("端末の回転への対応")
-#warning("キーボードのインタラクションが始まるとScrollViewが固定される")
+// TODO: 端末の回転への対応
+// TODO: bottomView → keyboard animation without animation
+// TODO: 各Viewを表示・非表示するためのアプローチ（AutoLayout前提にするのか、どちらも考慮した実装にするのか、高さをどうやって決定するのか）
+
 #warning("topviewが表示されたときも意図せずCollectionViewがスクロールする")
 
 public protocol FeuilleViewDelegate: class {
@@ -55,9 +54,7 @@ public class FeuilleView: TouchThroughView {
   private var bottomMiddleToKeyboardConstraint: NSLayoutConstraint!
   private var bottomMiddleToBottomConstraint: NSLayoutConstraint!
   private var bottomViewBottomConstraint: NSLayoutConstraint!
-
-  private var isIncludedTopViewHeight: Bool = true
-
+  
   private let panRecognizer = UIPanGestureRecognizer()
 
   private var interactiveState: InteractiveState = .completed
@@ -66,6 +63,11 @@ public class FeuilleView: TouchThroughView {
   private let defaultKeyboardFrame: CGRect
   private var oldFeuilleKeyboardHeight: CGFloat = 0
 
+  // TODO: topViewをキーボードの高さとして計算するのか（外部から設定できるようにはしたい）
+  private var isIncludedTopViewHeight: Bool = false
+
+  // TODO: 各Viewの合計が画面高さを超えたとき、上部のマージンとの兼ね合い(外部から設定できるようにはしたい)
+  private let verticalTopMargin: CGFloat = 48
   
   // MARK: - Initializers
 
@@ -120,7 +122,7 @@ public class FeuilleView: TouchThroughView {
 
       NSLayoutConstraint.activate([
         topViewHeight,
-        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: 48),
+        topView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor, constant: verticalTopMargin),
         topView.rightAnchor.constraint(equalTo: rightAnchor),
         topView.leftAnchor.constraint(equalTo: leftAnchor),
         topView.bottomAnchor.constraint(equalTo: middleView.topAnchor),
@@ -251,7 +253,7 @@ public class FeuilleView: TouchThroughView {
     if animated {
       self.endEditing(force)
     } else {
-      #warning("他のアニメーションが消える可能性がある")
+      // TODO: 他のアニメーションが消える可能性がある
       UIView.setAnimationsEnabled(false)
       self.endEditing(force)
       UIView.setAnimationsEnabled(true)
