@@ -12,7 +12,7 @@ import Foundation
 // TODO: bottomView → keyboard animation without animation
 // TODO: 各Viewを表示・非表示するためのアプローチ（AutoLayout前提にするのか、どちらも考慮した実装にするのか、高さをどうやって決定するのか）
 
-#warning("topviewが表示されたときも意図せずCollectionViewがスクロールする")
+#warning("キーボードを開いているときにCellを追加した場合、下までスクロールできない")
 
 public protocol FeuilleViewDelegate: class {
 
